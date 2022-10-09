@@ -8,6 +8,13 @@ Route::group(['middleware' => ['XSS']], function () {
     // student panel
     Route::group(['middleware' => ['StudentMiddleware']], function () {
 
+        // student panel marksheet view
+        Route::get('mark-sheet-student', ['as' => 'mark_sheet_student', 'uses' => 'Student\ResultController@markSheetStudent']);
+
+        Route::post('mark-sheet-student', ['as' => 'mark_sheet_student', 'uses' => 'Student\ResultController@markSheetStudentSearch']);
+
+        Route::post('mark-sheet-student/print', 'Student\ResultController@markSheetStudentPrint');
+
 
         //Route::get('delete-document/{id}', ['as' => 'delete_document', 'uses' => 'SmStudentAdmissionController@deleteDocument']);
         Route::get('delete-document/{id}', ['as' => 'delete_document', 'uses' => 'SmStudentAdmissionController@deleteDocument']);

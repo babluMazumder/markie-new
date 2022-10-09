@@ -126,7 +126,7 @@
 
                 <div class="row">
                     <div class="col-lg-12">
-                        <table id="default_table" class="display school-table " cellspacing="0" width="100%">
+                        <table id="table_id_table_2" class="display school-table " cellspacing="0" width="100%">
                             <thead>
                                 @if(session()->has('message-danger') != "")
                                 <tr>
@@ -157,11 +157,11 @@
                                         <td>
                                             <div class="d-flex radio-btn-flex">
                                                 <div class="mr-20">
-                                                    <input type="radio" name="attendance[{{@$student->id}}]" id="attendanceP{{@$student->id}}" value="P" class="common-radio attd" checked>
+                                                    <input type="radio" name="attendance[{{@$student->id}}]" id="attendanceP{{@$student->id}}" value="P" class="common-radio attd" {{in_array($student->id, $exam_attendance_childs)? 'checked':''}}>
                                                     <label for="attendanceP{{$student->id}}">@lang('lang.present')</label>
                                                 </div>
                                                 <div class="mr-20">
-                                                    <input type="radio" name="attendance[{{@$student->id}}]" id="attendanceL{{@$student->id}}" value="A" class="common-radio">
+                                                    <input type="radio" name="attendance[{{@$student->id}}]" id="attendanceL{{@$student->id}}" value="A" class="common-radio"  {{!in_array($student->id, $exam_attendance_childs)? 'checked':''}}>
                                                     <label for="attendanceL{{$student->id}}">@lang('lang.absent')</label>
                                                 </div>
                                             </div>

@@ -396,6 +396,7 @@ class SmExaminationController extends Controller
                $classes= SmAssignSubject::where('teacher_id',$teacher_info->id)->join('sm_classes','sm_classes.id','sm_assign_subjects.class_id')
                ->where('sm_assign_subjects.academic_id', getAcademicId())
                ->where('sm_assign_subjects.active_status', 1)
+               ->groupBy('sm_assign_subjects.class_id')
                ->where('sm_assign_subjects.school_id',Auth::user()->school_id)
                ->select('sm_classes.id','class_name')
                ->get();
@@ -594,12 +595,12 @@ class SmExaminationController extends Controller
         try{
             $exam_attendance = SmExamAttendance::where('class_id', $request->class)->where('section_id', $request->section)->where('exam_id', $request->exam)->where('subject_id', $request->subject)->first();
 
-            if ($exam_attendance == "") {
+            // if ($exam_attendance == "") {
 
-                Toastr::error('Exam Attendance not taken yet, please check exam attendance', 'Failed');
-                return redirect()->back();
-                // return redirect()->back()->with('message-danger', 'Exam Attendance not taken yet, please check exam attendance');
-            }
+            //     Toastr::error('Exam Attendance not taken yet, please check exam attendance', 'Failed');
+            //     return redirect()->back();
+            // }
+            
             $exams = SmExam::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
             $classes = SmClass::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
             $exam_types = SmExamType::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
@@ -843,13 +844,14 @@ class SmExaminationController extends Controller
         $subject_id = $request->subject;
         $subjectNames = SmSubject::where('id', $subject_id)->first();
 
-        $exam_attendance = SmExamAttendance::where('exam_id', $exam_id)->where('class_id', $class_id)->where('section_id', $section_id)->where('subject_id', $subject_id)->first();
-        if ($exam_attendance) {
-            $exam_attendance_child = SmExamAttendanceChild::where('exam_attendance_id', $exam_attendance->id)->first();
-        }else{
-            Toastr::error('Exam attendance not done yet', 'Failed');
-            return redirect()->back();
-        }
+        // $exam_attendance = SmExamAttendance::where('exam_id', $exam_id)->where('class_id', $class_id)->where('section_id', $section_id)->where('subject_id', $subject_id)->first();
+
+        // if ($exam_attendance) {
+        //     $exam_attendance_child = SmExamAttendanceChild::where('exam_attendance_id', $exam_attendance->id)->first();
+        // }else{
+        //     Toastr::error('Exam attendance not done yet', 'Failed');
+        //     return redirect()->back();
+        // }
 
 
             $students = SmStudent::where('active_status', 1)->where('class_id', $request->class)->where('section_id', $request->section)->where('academic_id', getAcademicId())->get();
@@ -1221,7 +1223,12 @@ class SmExaminationController extends Controller
            // dd($exam_attendance);
             $exam_attendance_childs = [];
             if ($exam_attendance != "") {
-                $exam_attendance_childs = $exam_attendance->examAttendanceChild;
+                foreach($exam_attendance->examAttendanceChild as $atten_student){
+                    if($atten_student->attendance_type == "P"){
+                        $exam_attendance_childs[] = $atten_student->student_id;
+                    }
+                    
+                }
             }
             $exams = SmExamType::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
                if (Auth::user()->role_id==1) {
@@ -1579,7 +1586,7 @@ class SmExaminationController extends Controller
         return $data;
     }
 
-    public function meritListReportSearch(Request $request)
+    public function meritListReportSearch_old(Request $request)
     {
         try{
         $iid = time();
@@ -1822,12 +1829,354 @@ class SmExaminationController extends Controller
         }
     }
 
+    public function meritListReportSearch(Request $request)
+    {
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        if ($request->method() == 'POST') {
+            //ur code here
+
+            $emptyResult = SmTemporaryMeritlist::truncate();
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'exam' => 'required',
+                'class' => 'required',
+                'section' => 'required'
+            ]);
+
+            if ($validator->fails()) {
+                if (ApiBaseMethod::checkUrl($request->fullUrl())) {
+                    return ApiBaseMethod::sendError('Validation Error.', $validator->errors());
+                }
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            $InputClassId = $request->class;
+            $InputExamId = $request->exam;
+            $InputSectionId = $request->section;
+
+            $class          = SmClass::find($InputClassId);
+            $section        = SmSection::find($InputSectionId);
+            $exam           = SmExamType::find($InputExamId);
+
+
+ 
+            $is_data = DB::table('sm_mark_stores')->where([['class_id', $InputClassId],['section_id', $InputSectionId],['exam_term_id', $InputExamId]])->first();
+            if(empty($is_data)){
+                return redirect()->back()->with('message-danger','Your result is not found!');
+            }
+
+
+
+            $exams = SmExamType::where('active_status', 1)->get();
+            $classes = SmClass::where('active_status', 1)->get();
+
+            $subjects = SmSubject::where('active_status', 1)->get();
+            $assign_subjects = SmAssignSubject::where('class_id', $class->id)->where('section_id', $section->id)->get();
+            $class_name = $class->class_name;
+
+
+            $exam_name = $exam->title;
+
+            $eligible_subjects       = SmAssignSubject::where('class_id', $InputClassId)->where('section_id', $InputSectionId)->get();
+            $eligible_students       = SmStudent::where('class_id', $InputClassId)->where('section_id', $InputSectionId)->get();
+
+
+
+
+            //all subject list in a specific class/section
+            $subject_ids        = [];
+            $subject_strings    = '';
+            $marks_string       = '';
+            foreach ($eligible_students as $SingleStudent) {
+                foreach ($eligible_subjects as $subject) {
+                    $subject_ids[]      = $subject->subject_id;
+                    $subject_strings    = (empty($subject_strings)) ? $subject->subject->subject_name : $subject_strings . ',' . $subject->subject->subject_name;
+                    $getMark            =  SmResultStore::where([
+                        ['exam_type_id',   $InputExamId],
+                        ['class_id',       $InputClassId],
+                        ['section_id',     $InputSectionId],
+                        ['student_id',     $SingleStudent->id],
+                        ['subject_id',     $subject->subject_id]
+                    ])->first();
+
+
+                    if (empty($getMark->total_marks)) {
+                        $FinalMarks = 0;
+                    } else {
+                        $FinalMarks = $getMark->total_marks;
+                    }
+                    $marks_string = (empty($marks_string)) ? $FinalMarks : $marks_string . ',' . $FinalMarks;
+                }
+                //end subject list for specific section/class
+
+                $results                =  SmResultStore::where([
+                    ['exam_type_id',   $InputExamId],
+                    ['class_id',       $InputClassId],
+                    ['section_id',     $InputSectionId],
+                    ['student_id',     $SingleStudent->id]
+                ])->get();
+
+
+                $is_absent                =  SmResultStore::where([
+                    ['exam_type_id',   $InputExamId],
+                    ['class_id',       $InputClassId],
+                    ['section_id',     $InputSectionId],
+                    ['is_absent',      1],
+                    ['student_id',     $SingleStudent->id]
+                ])->get();
+                $total_gpa_point        =  SmResultStore::where([
+                    ['exam_type_id',   $InputExamId],
+                    ['class_id',       $InputClassId],
+                    ['section_id',     $InputSectionId],
+                    ['student_id',     $SingleStudent->id]
+                ])->sum('total_gpa_point');
+                $total_marks            =  SmResultStore::where([
+                    ['exam_type_id',   $InputExamId],
+                    ['class_id',       $InputClassId],
+                    ['section_id',     $InputSectionId],
+                    ['student_id',     $SingleStudent->id]
+                ])->sum('total_marks');
+
+
+                $sum_of_mark = ($total_marks == 0) ? 0 : $total_marks;
+                $average_mark = ($total_marks == 0) ? 0 : floor($total_marks / $results->count()); //get average number 
+                $is_absent = (count($is_absent) > 0) ? 1 : 0;         //get is absent ? 1=Absent, 0=Present 
+                $total_GPA = ($total_gpa_point == 0) ? 0 : $total_gpa_point / $results->count();
+                $exart_gp_point = number_format($total_GPA, 2, '.', '');            //get gpa results 
+                $full_name          =   $SingleStudent->full_name;                 //get name 
+                $admission_no       =   $SingleStudent->admission_no;           //get admission no
+
+
+                $insert_results                     = new SmTemporaryMeritlist();
+                $insert_results->student_name       = $full_name;
+                $insert_results->admission_no       = $admission_no;
+                $insert_results->subjects_string    = $subject_strings;
+                $insert_results->marks_string       = $marks_string; 
+                $insert_results->total_marks        = $sum_of_mark;
+                $insert_results->average_mark       = $average_mark;
+                $insert_results->gpa_point          = $exart_gp_point; 
+                $markGrades = SmMarksGrade::where([['from', '<=', $exart_gp_point], ['up', '>=', $exart_gp_point]])->first(); 
+                $insert_results->result             = $markGrades->grade_name; 
+                $insert_results->section_id         = $InputSectionId;
+                $insert_results->class_id           = $InputClassId;
+                $insert_results->exam_id            = $InputExamId;
+                $insert_results->save();
+
+                $subject_strings = "";
+                $marks_string = "";
+                $total_marks = 0;
+                $average = 0;
+                $exart_gp_point = 0;
+                $admission_no = 0;
+                $full_name = "";
+            } //end loop eligible_students
+
+
+
+            $first_data = SmTemporaryMeritlist::find(1);
+            $subjectlist = explode(',', $first_data->subjects_string); 
+            $allresult_data = SmTemporaryMeritlist::orderBy('gpa_point', 'desc')->get();
+            $merit_serial = 1;
+            foreach ($allresult_data as $row) {
+                $D = SmTemporaryMeritlist::find($row->id);
+                $D->merit_order = $merit_serial++;
+                $D->save();
+            }
+            $allresult_data = SmTemporaryMeritlist::orderBy('merit_order', 'asc')->get();
+
+
+
+            if (ApiBaseMethod::checkUrl($request->fullUrl())) {
+                $data = [];
+                $data['exams'] = $exams->toArray();
+                $data['classes'] = $classes->toArray(); 
+                $data['subjects'] = $subjects->toArray();
+                $data['class'] = $class;
+                $data['section'] = $section;
+                $data['exam'] = $exam; 
+                $data['subjectlist'] = $subjectlist;
+                $data['allresult_data'] = $allresult_data;
+                $data['class_name'] = $class_name;
+                $data['assign_subjects'] = $assign_subjects;
+                $data['exam_name'] = $exam_name;
+                return ApiBaseMethod::sendResponse($data, null);
+            } 
+
+
+  
+
+            return view('backEnd.reports.merit_list_report', compact('exams', 'classes', 'subjects', 'class', 'section', 'exam', 'subjectlist', 'allresult_data', 'class_name', 'assign_subjects', 'exam_name','InputClassId','InputExamId','InputSectionId'));
+        }
+    }
+
+    public function meritListPrint(Request $request)
+    { 
+
+         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+         
+            $emptyResult = SmTemporaryMeritlist::truncate(); 
+
+            $InputClassId = $request->InputClassId;
+            $InputExamId = $request->InputExamId;
+            $InputSectionId = $request->InputSectionId;
+
+            $class          = SmClass::find($InputClassId);
+            $section        = SmSection::find($InputSectionId);
+            $exam           = SmExamType::find($InputExamId);
+ 
+            $is_data = DB::table('sm_mark_stores')->where([['class_id', $InputClassId],['section_id', $InputSectionId],['exam_term_id', $InputExamId]])->first();
+            
+
+            $exams = SmExamType::where('active_status', 1)->get();
+            $classes = SmClass::where('active_status', 1)->get();
+
+
+
+            //$subjects = SmSubject::where('active_status', 1)->get();
+            $assign_subjects = SmAssignSubject::where('class_id', $class->id)->where('section_id', $section->id)->get();
+            $class_name = $class->class_name;
+            $exam_name = $exam->title;
+
+            $eligible_subjects       = SmAssignSubject::where('class_id', $InputClassId)->where('section_id', $InputSectionId)->get();
+            $eligible_students       = SmStudent::where('class_id', $InputClassId)->where('section_id', $InputSectionId)->get();
+
+
+            //all subject list in a specific class/section
+            $subject_ids        = [];
+            $subject_strings    = '';
+            $marks_string       = '';
+            foreach ($eligible_students as $SingleStudent) {
+
+                foreach ($eligible_subjects as $subject) {
+
+                    $subject_ids[]      = $subject->subject_id;
+                    $subject_strings    = blank($subject_strings) ? $subject->subject->subject_name : $subject_strings . ',' . $subject->subject->subject_name;
+
+                    $getMark            =  SmResultStore::where([
+                        ['exam_type_id',   $InputExamId],
+                        ['class_id',       $InputClassId],
+                        ['section_id',     $InputSectionId],
+                        ['student_id',     $SingleStudent->id],
+                        ['subject_id',     $subject->subject_id]
+                    ])->first();
+
+
+                    if (blank($getMark)) {
+                        $FinalMarks = 0;
+                    } else {
+                        $FinalMarks = $getMark->total_marks;
+                    }
+                    $marks_string = blank($marks_string) ? $FinalMarks : $marks_string . ',' . $FinalMarks;
+                }
+                //end subject list for specific section/class
+
+                $results                =  SmResultStore::where([
+                    ['exam_type_id',   $InputExamId],
+                    ['class_id',       $InputClassId],
+                    ['section_id',     $InputSectionId],
+                    ['student_id',     $SingleStudent->id]
+                ])->get();
+
+
+                $is_absent                =  SmResultStore::where([
+                    ['exam_type_id',   $InputExamId],
+                    ['class_id',       $InputClassId],
+                    ['section_id',     $InputSectionId],
+                    ['is_absent',      1],
+                    ['student_id',     $SingleStudent->id]
+                ])->get();
+                $total_gpa_point        =  SmResultStore::where([
+                    ['exam_type_id',   $InputExamId],
+                    ['class_id',       $InputClassId],
+                    ['section_id',     $InputSectionId],
+                    ['student_id',     $SingleStudent->id]
+                ])->sum('total_gpa_point');
+                $total_marks            =  SmResultStore::where([
+                    ['exam_type_id',   $InputExamId],
+                    ['class_id',       $InputClassId],
+                    ['section_id',     $InputSectionId],
+                    ['student_id',     $SingleStudent->id]
+                ])->sum('total_marks');
+
+
+                $sum_of_mark = ($total_marks == 0) ? 0 : $total_marks;
+                $average_mark = ($total_marks == 0) ? 0 : floor($total_marks / $results->count()); //get average number 
+                $is_absent = (count($is_absent) > 0) ? 1 : 0;         //get is absent ? 1=Absent, 0=Present 
+                $total_GPA = ($total_gpa_point == 0) ? 0 : $total_gpa_point / $results->count();
+                $exart_gp_point = number_format($total_GPA, 2, '.', '');            //get gpa results 
+                $full_name          =   $SingleStudent->full_name;                 //get name 
+                $admission_no       =   $SingleStudent->admission_no;           //get admission no
+
+
+                $insert_results                     = new SmTemporaryMeritlist();
+                $insert_results->student_name       = $full_name;
+                $insert_results->admission_no       = $admission_no;
+                $insert_results->subjects_string    = $subject_strings;
+                $insert_results->marks_string       = $marks_string; 
+                $insert_results->total_marks        = $sum_of_mark;
+                $insert_results->average_mark       = $average_mark;
+                $insert_results->gpa_point          = $exart_gp_point; 
+                $markGrades = SmMarksGrade::where([['from', '<=', $exart_gp_point], ['up', '>=', $exart_gp_point]])->first(); 
+                $insert_results->result             = $markGrades->grade_name; 
+                $insert_results->section_id         = $InputSectionId;
+                $insert_results->class_id           = $InputClassId;
+                $insert_results->exam_id            = $InputExamId;
+                $insert_results->save();
+
+                $subject_strings = "";
+                $marks_string = "";
+                $total_marks = 0;
+                $average = 0;
+                $exart_gp_point = 0;
+                $admission_no = 0;
+                $full_name = "";
+            } //end loop eligible_students
+
+            $first_data = SmTemporaryMeritlist::find(1);
+            $subjectlist = explode(',', $first_data->subjects_string); 
+ 
+            $allresult_data = SmTemporaryMeritlist::orderBy('gpa_point', 'desc')->get();
+            $merit_serial = 1;
+            foreach ($allresult_data as $row) {
+                $D = SmTemporaryMeritlist::find($row->id);
+                $D->merit_order = $merit_serial++;
+                $D->save();
+            }
+            $allresult_data = SmTemporaryMeritlist::orderBy('merit_order', 'asc')->get();
+
+       
+  
+        $customPaper = array(0,0,700.00,1500.80);
+        $pdf = PDF::loadView('backEnd.reports.merit_list_report_print', 
+            [
+                'exams' => $exams, 
+                'classes' => $classes,    
+                'class' => $class, 
+                'section' => $section, 
+                'exam' => $exam,  
+                'subjectlist' => $subjectlist, 
+                'allresult_data' => $allresult_data, 
+                'class_name' => $class_name, 
+                'assign_subjects' => $assign_subjects, 
+                'exam_name' => $exam_name, 
+                'exam_name' => $exam_name,
+
+            ])->setPaper($customPaper, 'landscape');
+        return $pdf->stream('Merit_LIST.pdf');
+  
+    }
 
 
 
 
 
-    public function meritListPrint($exam_id, $class_id, $section_id)
+
+
+
+    public function meritListPrint_old($exam_id, $class_id, $section_id)
     {
         set_time_limit(2700);
          try{
@@ -1861,7 +2210,7 @@ class SmExaminationController extends Controller
         // $allresult_data = SmTemporaryMeritlist::orderBy('merit_order', 'asc')->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
         $subjectlist = explode(',', $allresult_dat->subjects_string);
 
-       return view('backEnd.reports.merit_list_report_print',compact('exams','classes','subjects','class','section','exam','subjectlist','allresult_data','class_name','assign_subjects','exam_name','optional_subject_setup'));
+       //return view('backEnd.reports.merit_list_report_print',compact('exams','classes','subjects','class','section','exam','subjectlist','allresult_data','class_name','assign_subjects','exam_name','optional_subject_setup'));
 
 
         $pdf = PDF::loadView(
@@ -1878,8 +2227,7 @@ class SmExaminationController extends Controller
                 'class_name' => $class_name,
                 'assign_subjects' => $assign_subjects,
                 'exam_name' => $exam_name,
-                'optional_subject_setup' => $optional_subject_setup,
-
+                'optional_subject_setup' => $optional_subject_setup
             ]
         )->setPaper('A4', 'landscape');
 
@@ -1990,10 +2338,13 @@ class SmExaminationController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-      try{
+      // try{
         $exams = SmExamType::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
 
         $classes        =   SmClass::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
+        $exam_types     =   SmExamType::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
+        $section        =   SmSection::where('active_status', 1)->where('id',$request->section)->first();
+
 
         $student_detail =   $studentDetails = SmStudent::find($request->student);
 
@@ -2001,28 +2352,69 @@ class SmExaminationController extends Controller
         
         $section_id     =   $request->section;
         $class_id       =   $request->class;
+        $class_name     =   SmClass::find($class_id);
         $exam_type_id   =   $request->exam;
         $student_id     =   $request->student;
         $exam_details   =   $exams->where('active_status', 1)->find($exam_type_id);
 
-        $optional_subject='';
+        // $optional_subject='';
 
-            $get_optional_subject=SmOptionalSubjectAssign::where('student_id','=',$student_detail->id)->where('session_id','=',$student_detail->session_id)->first();
-            if ($get_optional_subject!='') {
-                $optional_subject=$get_optional_subject->subject_id;
-            }
-            $optional_subject_setup=SmClassOptionalSubject::where('class_id','=',$request->class)->first();
+        //     $get_optional_subject=SmOptionalSubjectAssign::where('student_id','=',$student_detail->id)->where('session_id','=',$student_detail->session_id)->first();
+        //     if ($get_optional_subject!='') {
+        //         $optional_subject=$get_optional_subject->subject_id;
+        //     }
+        //     $optional_subject_setup=SmClassOptionalSubject::where('class_id','=',$request->class)->first();
 
-            $mark_sheet = SmResultStore::where([['class_id', $request->class], ['exam_type_id', $request->exam], ['section_id', $request->section], ['student_id', $request->student]])->whereIn('subject_id', $subjects->pluck('subject_id')->toArray())->where('school_id',Auth::user()->school_id)->get();
-            $grades = SmMarksGrade::where('active_status',1)->get();
+        //     $mark_sheet = SmResultStore::where([['class_id', $request->class], ['exam_type_id', $request->exam], ['section_id', $request->section], ['student_id', $request->student]])->whereIn('subject_id', $subjects->pluck('subject_id')->toArray())->where('school_id',Auth::user()->school_id)->get();
+        //     $grades = SmMarksGrade::where('active_status',1)->get();
 
-            if (count($mark_sheet) == 0) {
+        //     if (count($mark_sheet) == 0) {
 
-                Toastr::error('Ops! Your result is not found! Please check mark register', 'Failed');
-                return redirect('mark-sheet-report-student');
-            }
-            $is_result_available = SmResultStore::where([['class_id', $request->class], ['exam_type_id', $request->exam], ['section_id', $request->section], ['student_id', $request->student]])->where('created_at', 'LIKE', '%' . YearCheck::getYear() . '%')->where('school_id',Auth::user()->school_id)->get();
-            if (count($mark_sheet) > 0) {
+        //         Toastr::error('Ops! Your result is not found! Please check mark register', 'Failed');
+        //         return redirect('mark-sheet-report-student');
+        //     }
+
+
+
+        $is_result_available = SmResultStore::where([['class_id', $request->class], ['exam_type_id', $request->exam], ['section_id', $request->section], ['student_id', $request->student]])->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
+
+
+        $students = SmStudent::where('class_id', $request->class)->where('section_id', $request->section)->where('academic_id', getAcademicId())->get();
+
+
+        $sub_id_for_distribute = "";
+
+        foreach ($subjects as $subject) {
+
+            $sub_id_for_distribute = $subject->subject_id;
+
+
+            // $mark_sheet = SmResultStore::where([['class_id', $request->class], ['exam_type_id', $request->exam], ['section_id', $request->section], ['student_id', $request->student]])->where('subject_id', $subject->subject_id)->first();
+            
+            // if ($mark_sheet == "") {
+            //     Toastr::error('Ops! Your result is not found! Please check mark register', 'Failed');
+            //     return redirect('mark-sheet-report-student');
+            // }
+
+        }
+
+
+        $student_final_marks = [];
+
+        foreach($students as $student){
+
+            $subject_mark = SmResultStore::where('class_id', $request->class)->where('section_id', $request->section)->where('exam_type_id', $request->exam)->where('student_id', $student->id)->sum('total_marks');
+
+            $student_final_marks[] = $subject_mark;
+
+        }
+
+        $total_marks_by_student = SmResultStore::where('class_id', $request->class)->where('section_id', $request->section)->where('exam_type_id', $request->exam)->where('student_id', $request->student)->sum('total_marks');
+
+
+        $distributed_marks = SmExamSetup::where('exam_term_id', $request->exam)->where('class_id', $request->class)->where('section_id', $request->section)->where('subject_id', $sub_id_for_distribute)->get();
+
+            if (count($is_result_available) > 0) {
 
 
                 if (ApiBaseMethod::checkUrl($request->fullUrl())) {
@@ -2045,14 +2437,14 @@ class SmExaminationController extends Controller
                 }
                 $student = $student_id;
 
-                if ($optional_subject == '') {
+                // if ($optional_subject == '') {
 
-                    return view('backEnd.reports.mark_sheet_report_normal', compact('optional_subject_setup', 'classes', 'studentDetails', 'exams', 'classes', 'subjects', 'class_id', 'student_detail', 'mark_sheet', 'exam_type_id', 'section_id', 'student_id', 'exam_details', 'input', 'optional_subject', 'grades'));
+                    // return view('backEnd.reports.mark_sheet_report_normal', compact('optional_subject_setup', 'classes', 'studentDetails', 'exams', 'classes', 'subjects', 'class_id', 'student_detail', 'mark_sheet', 'exam_type_id', 'section_id', 'student_id', 'exam_details', 'input', 'optional_subject', 'grades'));
 
-                } else {
-                    return view('backEnd.reports.mark_sheet_report_student', compact('optional_subject_setup', 'classes', 'studentDetails', 'exams', 'classes', 'subjects', 'class_id', 'student_detail', 'mark_sheet', 'exam_type_id', 'section_id', 'student_id', 'exam_details', 'input', 'optional_subject', 'grades'));
+                // } else {
+                    return view('backEnd.reports.mark_sheet_report_student', compact('exam_types', 'classes', 'studentDetails', 'exams', 'classes', 'subjects', 'section', 'class_id', 'student_detail', 'is_result_available', 'exam_type_id', 'section_id', 'student_id', 'exam_details', 'class_name','input', 'distributed_marks', 'student_final_marks', 'total_marks_by_student'));
 
-            }
+            // }
 
 
         } else {
@@ -2080,94 +2472,124 @@ class SmExaminationController extends Controller
         $class_id = $request->class;
 
             return view('backEnd.reports.mark_sheet_report_student', compact( 'optional_subject', 'classes', 'studentDetails', 'exams', 'classes', 'marks_register', 'subjects', 'class', 'section', 'exam_detail', 'grades', 'exam_id', 'class_id', 'student_detail', 'input'));
-        } catch (\Exception $e) {
+        // } catch (\Exception $e) {
 
-            Toastr::error('Operation Failed', 'Failed');
-            return redirect()->back();
-        }
+        //     Toastr::error('Operation Failed', 'Failed');
+        //     return redirect()->back();
+        // }
     }
 
 
-    public function markSheetReportStudentPrint($exam_id, $class_id, $section_id, $student_id)
+    public function markSheetReportStudentPrint(Request $request)
     {
-       try{
+       // try{
+        $input['exam_id'] = $request->exam;
+        $input['class_id'] = $request->class;
+        $input['section_id'] = $request->section;
+        $input['student_id'] = $request->student;
+
+
         $exams = SmExamType::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
+
         $classes        =   SmClass::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
         $exam_types     =   SmExamType::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
+        $section        =   SmSection::where('active_status', 1)->where('id',$request->section)->first();
 
-        $subjects = SmAssignSubject::where([['class_id', $class_id], ['section_id', $section_id]])->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
-        $student_detail =   $studentDetails = SmStudent::find($student_id);
-        $section        =   SmSection::where('active_status', 1)->where('id', $section_id)->first();
-        $section_id     =   $section_id;
-        $class_id       =   $class_id;
 
+        $student_detail =   $studentDetails = SmStudent::find($request->student);
+
+        $subjects = $studentDetails->className->subjects->where('section_id', $request->section)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id);
+        
+        $section_id     =   $request->section;
+        $class_id       =   $request->class;
         $class_name     =   SmClass::find($class_id);
-        $exam_type_id   =   $exam_id;
-        $student_id     =   $student_id;
-        $exam_details     =   SmExamType::where('active_status', 1)->find($exam_type_id);
-        $optional_subject='';
+        $exam_type_id   =   $request->exam;
+        $student_id     =   $request->student;
+        $exam_details   =   $exams->where('active_status', 1)->find($exam_type_id);
+        $marks_grades     =   SmMarksGrade::where('active_status', 1)->orderBy('gpa', 'desc')->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
 
-        $get_optional_subject=SmOptionalSubjectAssign::where('student_id','=',$student_detail->id)->where('session_id','=',$student_detail->session_id)->first();
-        if ($get_optional_subject!='') {
-            $optional_subject=$get_optional_subject->subject_id;
-        }
-        $optional_subject_setup=SmClassOptionalSubject::where('class_id','=',$class_id)->first();
-        $is_result_available = SmResultStore::where([['class_id', $class_id], ['exam_type_id', $exam_id], ['section_id', $section_id], ['student_id', $student_id]])->where('academic_id', getAcademicId())->get();
-
-        if ($is_result_available->count() > 0) {
-
-            if ($optional_subject=='') {
-                return view('backEnd.reports.mark_sheet_report_normal_print', [
-                    'exam_types' => $exam_types,
-                    'classes' => $classes,
-                    'subjects' => $subjects,
-                    'class' => $class_id,
-                    'class_name' => $class_name,
-                    'section' => $section,
-                    'exams' => $exams,
-                    'section_id' => $section_id,
-                    'exam_type_id' => $exam_type_id,
-                    'is_result_available' => $is_result_available,
-                    'student_detail' => $student_detail,
-                    'class_id' => $class_id,
-                    'studentDetails' => $studentDetails,
-                    'student_id' => $student_id,
-                    'exam_details' => $exam_details,
-                    'optional_subject' => $optional_subject,
-                    'optional_subject_setup' => $optional_subject_setup,
-
-                ]
-                );
-            } else {
-                return view('backEnd.reports.mark_sheet_report_student_print', [
-                    'exam_types' => $exam_types,
-                    'classes' => $classes,
-                    'subjects' => $subjects,
-                    'class' => $class_id,
-                    'class_name' => $class_name,
-                    'section' => $section,
-                    'exams' => $exams,
-                    'section_id' => $section_id,
-                    'exam_type_id' => $exam_type_id,
-                    'is_result_available' => $is_result_available,
-                    'student_detail' => $student_detail,
-                    'class_id' => $class_id,
-                    'studentDetails' => $studentDetails,
-                    'student_id' => $student_id,
-                    'exam_details' => $exam_details,
-                    'optional_subject' => $optional_subject,
-                    'optional_subject_setup' => $optional_subject_setup,
-
-                ]
-                );
-            }
+        $general_setting = SmGeneralSettings::find(1);
 
 
+        // $optional_subject='';
+
+        // $get_optional_subject=SmOptionalSubjectAssign::where('student_id','=',$student_detail->id)->where('session_id','=',$student_detail->session_id)->first();
+        // if ($get_optional_subject!='') {
+        //     $optional_subject=$get_optional_subject->subject_id;
+        // }
+        // $optional_subject_setup=SmClassOptionalSubject::where('class_id','=',$class_id)->first();
+        $is_result_available = SmResultStore::where([['class_id', $request->class], ['exam_type_id', $request->exam], ['section_id', $request->section], ['student_id', $request->student]])->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
+
+
+
+        $students = SmStudent::where('class_id', $request->class)->where('section_id', $request->section)->where('academic_id', getAcademicId())->get();
+
+
+        $sub_id_for_distribute = "";
+
+        foreach ($subjects as $subject) {
+
+            $sub_id_for_distribute = $subject->subject_id;
 
         }
-        }catch (\Exception $e) {
-            Toastr::error('Operation Failed', 'Failed');
-            return redirect()->back();
+
+
+        $student_final_marks = [];
+
+        foreach($students as $student){
+
+            $subject_mark = SmResultStore::where('class_id', $request->class)->where('section_id', $request->section)->where('exam_type_id', $request->exam)->where('student_id', $student->id)->sum('total_marks');
+
+            $student_final_marks[] = $subject_mark;
+
         }
+
+        $total_marks_by_student = SmResultStore::where('class_id', $request->class)->where('section_id', $request->section)->where('exam_type_id', $request->exam)->where('student_id', $request->student)->sum('total_marks');
+
+
+        $distributed_marks = SmExamSetup::where('exam_term_id', $request->exam)->where('class_id', $request->class)->where('section_id', $request->section)->where('subject_id', $sub_id_for_distribute)->get();
+
+            if (count($is_result_available) > 0) {
+
+           
+                $customPaper = array(0,0,700.00,1000.80);
+        $pdf = PDF::loadView('backEnd.reports.mark_sheet_report_student_print', 
+            [
+                'exam_types' => $exam_types, 
+                'classes' => $classes,    
+                'subjects' => $subjects, 
+                'class' => $class_id, 
+                'class_name' => $class_name,
+                'section' => $section, 
+                'exams' => $exams,  
+                'section_id' => $section_id, 
+                'exam_type_id' => $exam_type_id, 
+                'is_result_available' => $is_result_available, 
+                'student_detail' => $student_detail, 
+                'class_id' => $class_id, 
+                'studentDetails' => $studentDetails,
+                'student_id' => $student_id,
+                'exam_details' => $exam_details,
+                'total_marks_by_student' => $total_marks_by_student,
+                'student_final_marks' => $student_final_marks,
+                'distributed_marks' => $distributed_marks,
+                'input' => $input,
+                'marks_grades' => $marks_grades,
+                'marks_grades' => $marks_grades,
+                'teacher_comment' => $request->teacher_comment,
+                'principal_comment' => $request->principal_comment,
+                'general_setting' => $general_setting
+
+            ])->setPaper('A4','portrait');
+        return $pdf->stream('marks-sheet-of-'.$student_detail->full_name.'.pdf');
+            
+
+
+
+        }
+        // }catch (\Exception $e) {
+        //     Toastr::error('Operation Failed', 'Failed');
+        //     return redirect()->back();
+        // }
     }
 }

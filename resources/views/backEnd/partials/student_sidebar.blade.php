@@ -101,7 +101,7 @@
         <ul class="collapse list-unstyled" id="subMenuStudentExam">
             @if(userPermission(37))
                 <li>
-                    <a href="{{route('student_result')}}">@lang('lang.result')</a>
+                    <a href="{{route('mark_sheet_student')}}">@lang('lang.result')</a>
                 </li>
             @endif
             @if(userPermission(38))

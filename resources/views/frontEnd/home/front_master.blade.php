@@ -22,7 +22,20 @@
         margin-bottom: 0px;
     }
 </style>
+
+
+
 @php
+
+$links = App\SmCustomLink::find(1);
+    $setting = App\SmGeneralSettings::find(1);
+    if (isset($setting->copyright_text)) {
+        $copyright_text = $setting->copyright_text;
+    } else {
+        $copyright_text = 'Copyright © 2019 All rights reserved | This template is made with by Codethemes';
+    }
+
+    
 if(moduleStatusCheck('ParentRegistration')){
     $is_registration_permission = Modules\ParentRegistration\Entities\SmRegistrationSetting::first('position'); 
 }
@@ -177,175 +190,52 @@ $setting  = generalSetting();
 <footer class="footer_area section-gap-top">
     <div class="container">
         <div class="row footer_inner">
-            @php
-                $custom_link=App\SmCustomLink::find(1);
-            @endphp
-            @if (@$custom_link!='')
-
-
+            @if(isset($per["Custom Links"]))
+                @php
+                    $url[1]=[1,2,3,4];
+                    $url[2]=[5,6,7,8];
+                    $url[3]=[9,10,11,12];
+                    $url[4]=[13,14,15,16];
+                    for($i=1; $i<=4; $i++){
+                     $title ='title'.$i ;
+                @endphp
                 <div class="col-lg-3 col-sm-6">
-                    <div class="footer-widget">
+                    <aside class="f_widget ab_widget">
                         <div class="f_title">
-                            <h4>{{ $custom_link->title1 }}</h4>
+                            <h4>{{$links!=""?$links->$title:''}}</h4>
                         </div>
-                        <div class="footer-list">
-                            <nav>
-                                <ul>
-                                    @if(moduleStatusCheck('ParentRegistration')== TRUE)
-                                   
-                                        @if(isset($is_registration_permission) && $is_registration_permission->position==2)
-                                       
-                                            <li><a href="{{url('/parentregistration/registration')}}">Student
-                                                    Registration</a></li>
-                                        @endif
-                                    @endif
-                                    @if ($custom_link->link_href1!='')
-                                        <li>
-                                            <a href="{{ $custom_link->link_href1 }}">{{ $custom_link->link_label1 }} </a>
-                                        </li>
-
-                                    @endif
-                                    @if ($custom_link->link_href5!='')
-                                        <li><a href="{{ $custom_link->link_href5 }}">{{ $custom_link->link_label5 }}</a>
-                                        </li>
-                                    @endif
-                                    @if ($custom_link->link_href9!='')
-                                        <li><a href="{{ $custom_link->link_href9 }}">{{ $custom_link->link_label9 }}</a>
-                                        </li>
-
-                                    @endif
-                                    @if ($custom_link->link_href13!='')
-                                        <li>
-                                            <a href="{{ $custom_link->link_href13 }}">{{ $custom_link->link_label13 }} </a>
-                                        </li>
-                                    @endif
-
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
+                        <ul>
+                            @php
+                                foreach($url[$i] as $j){
+                                    $link_label ='link_label'.$j ;
+                                    $link_href ='link_href'.$j ;
+                            @endphp
+                            <li>
+                                <a href="{{$links !="" ? $links->$link_href:''}}"
+                                   style="color: #828bb2"> {{$links !="" ? $links->$link_label:''}} </a>
+                            </li>
+                            @php } @endphp
+                        </ul>
+                    </aside>
                 </div>
-                <div class="col-lg-3 col-sm-6">
-                    <div class="footer-widget">
-                        <div class="f_title">
-                            <h4>{{ $custom_link->title2 }}</h4>
-                        </div>
-                        <div class="footer-list">
-                            <nav>
-                                <ul>
-                                    @if ($custom_link->link_href2!='')
-                                        <li><a href="{{ $custom_link->link_href2}}">{{ $custom_link->link_label2}}</a>
-                                        </li>
-
-                                    @endif
-                                    @if ($custom_link->link_href6!='')
-                                        <li>
-                                            <a href="{{ url($custom_link->link_href6) }}">{{ $custom_link->link_label6 }}</a>
-                                        </li>
-                                    @endif
-                                    @if ($custom_link->link_href10!='')
-                                        <li>
-                                            <a href="{{ $custom_link->link_href10 }}">{{ $custom_link->link_label10 }}</a>
-                                        </li>
-                                    @endif
-                                    @if ($custom_link->link_href14!='')
-                                        <li>
-                                            <a href="{{ $custom_link->link_href14 }}">{{ $custom_link->link_label14 }}</a>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-sm-6">
-                    <div class="footer-widget">
-                        <div class="f_title">
-                            <h4>{{ $custom_link->title3 }}</h4>
-                        </div>
-                        <div class="footer-list">
-                            <nav>
-                                <ul>
-                                    @if ($custom_link->link_href3!='')
-                                        <li><a href="{{ $custom_link->link_href3}}">{{ $custom_link->link_label3}}</a>
-                                        </li>
-                                    @endif
-                                    @if ($custom_link->link_href7!='')
-                                        <li><a href="{{ $custom_link->link_href7 }}">{{ $custom_link->link_label7 }}</a>
-                                        </li>
-                                    @endif
-                                    @if ($custom_link->link_href11!='')
-                                        <li>
-                                            <a href="{{ $custom_link->link_href11 }}">{{ $custom_link->link_label11 }}</a>
-                                        </li>
-                                    @endif
-                                    @if ($custom_link->link_href15!='')
-                                        <li>
-                                            <a href="{{ $custom_link->link_href15 }}">{{ $custom_link->link_label15 }}</a>
-                                        </li>
-                                    @endif
-
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-sm-6">
-                    <div class="footer-widget">
-                        <div class="f_title">
-                            <h4>{{ $custom_link->title4 }}</h4>
-                        </div>
-                        <div class="footer-list">
-                            <nav>
-                                <ul>
-                                    @if ($custom_link->link_href4!='')
-                                        <li><a href="{{ $custom_link->link_href4}}">{{ $custom_link->link_label4}}</a>
-                                        </li>
-                                    @endif
-                                    @if ($custom_link->link_href8!='')
-                                        <li><a href="{{ $custom_link->link_href8 }}">{{ $custom_link->link_label8 }}</a>
-                                        </li>
-                                    @endif
-                                    @if ($custom_link->link_href12!='')
-                                        <li>
-                                            <a href="{{ $custom_link->link_href12 }}">{{ $custom_link->link_label12 }}</a>
-                                        </li>
-                                    @endif
-                                    @if ($custom_link->link_href16!='')
-                                        <li>
-                                            <a href="{{ $custom_link->link_href16 }}">{{ $custom_link->link_label16 }}</a>
-                                        </li>
-                                    @endif
-
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
+                @php } @endphp
             @endif
 
         </div>
         <div class="row single-footer-widget">
             <div class="col-lg-8 col-md-9">
                 <div class="copy_right_text">
-                    @if ($setting->copyright_text)
-                        <p>{!! $setting->copyright_text !!}</p>
-                        @else
-                        Copyright © 2019 All rights reserved | This application is made with by Codethemes
-                    @endif
+                    <p>{!! $copyright_text !!}</p>
                 </div>
             </div>
 
             @if(isset($per["Social Icons"]))
                 <div class="col-lg-4 col-md-3">
                     <div class="social_widget">
-                        @if(@$social_icons)
-                            @foreach($social_icons as $social_icon)
-                                @if (@$social_icon->url != "")
-                                    <a href="{{@$social_icon->url}}"><i class="{{$social_icon->icon}}"></i></a>
-                                @endif
-                            @endforeach
-                        @endif
+                        <a href="{{@$links->facebook_url}}"><i class="fa fa-facebook"></i></a>
+                        <a href="{{@$links->twitter_url}}"><i class="fa fa-twitter"></i></a>
+                        <a href="{{@$links->dribble_url}}"><i class="fa fa-dribbble"></i></a>
+                        <a href="{{@$links->linkedin_url}}"><i class="fa fa-linkedin"></i></a>
                     </div>
                 </div>
             @endif

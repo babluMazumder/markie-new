@@ -63,8 +63,12 @@ class SmMarksRegister extends Model
        
 
             $exam_attendance = SmExamAttendance::where('exam_id', $exam_id)->where('class_id', $class_id)->where('section_id', $section_id)->where('subject_id', $subject_id)->first();
-            $exam_attendance_child = SmExamAttendanceChild::where('exam_attendance_id', $exam_attendance->id)->where('student_id', $student_id)->first();
-            return $exam_attendance_child;
+            if($exam_attendance != ""){
+                $exam_attendance_child = SmExamAttendanceChild::where('exam_attendance_id', $exam_attendance->id)->where('student_id', $student_id)->first();
+                return $exam_attendance_child;
+            }
+
+            return false;
 
         
 

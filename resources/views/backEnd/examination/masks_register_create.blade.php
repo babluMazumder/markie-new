@@ -227,7 +227,6 @@
 
                         </tr>
                         @endforeach 
-                         @if(userPermission(224))
                         <tr>
                             <td colspan="{{count($marks_entry_form) + 5}}" class="text-center">
                                 <button type="submit" class="primary-btn fix-gr-bg mt-20">
@@ -236,7 +235,6 @@
                                 </button>
                             </td>
                         </tr>
-                        @endif
                     </tbody>
                 </table>
 

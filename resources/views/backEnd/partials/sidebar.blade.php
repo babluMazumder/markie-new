@@ -126,6 +126,12 @@ $school_config = schoolConfig();
                                         <a href="{{route('generate_id_card')}}">@lang('lang.generate_id_card')</a>
                                     </li>
                                 @endif
+                                <li>
+                                    <a href="{{route('generate_new_password')}}">Generate New Password</a>
+                                </li>
+                                <li>
+                                    <a href="{{route('generate_login_card')}}">Generate Login card</a>
+                                </li>
                             </ul>
                         </li>
 

@@ -55,6 +55,13 @@
                                 @if ($errors->any())
                                      <div class="error text-danger ">{{ 'Something went wrong, please try again' }}</div>
                                 @endif
+                                
+                                @if($errors->any())
+    @foreach ($errors->all() as $error)
+        <div>{{ $error }}</div>
+    @endforeach
+@endif
+
                             </div>
                             <div class="col-lg-12">
                                 <div class="main-title">

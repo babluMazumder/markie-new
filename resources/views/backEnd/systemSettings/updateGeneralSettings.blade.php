@@ -134,7 +134,7 @@
                         <div class="row mb-40">
                             
 
-                           <div class="col-lg-4">
+                           <div class="col-lg-3">
                                 <div class="input-effect">
                                     <select class="niceSelect w-100 bb form-control{{ $errors->has('language_id') ? ' is-invalid' : '' }}" name="language_id" id="language_id">
                                         <option data-display="@lang('lang.language') *" value="">@lang('lang.select') <span>*</span></option>
@@ -160,7 +160,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-lg-4">
+                            <div class="col-lg-3">
                                 <div class="input-effect">
                                     <select class="niceSelect w-100 bb form-control{{ $errors->has('date_format_id') ? ' is-invalid' : '' }}" name="date_format_id" id="date_format_id">
                                         <option data-display="@lang('lang.select_date_format') *" value="">@lang('lang.select') <span>*</span></option>
@@ -184,7 +184,7 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="col-lg-4">
+                            <div class="col-lg-3">
                                 <div class="input-effect">
                                      <select name="time_zone" class="niceSelect w-100 bb form-control {{ $errors->has('time_zone') ? ' is-invalid' : '' }}" id="time_zone">
                                         <option data-display="@lang('lang.select') @lang('lang.time_zone') *" value="">@lang('lang.select') @lang('lang.time_zone') *</option>
@@ -207,6 +207,19 @@
 
                                  </div>
                             </div>
+                            <div class="col-lg-3">
+                                    <div class="input-effect">
+                                        <input class="primary-input form-control{{ $errors->has('exam_average_mark') ? ' is-invalid' : '' }}"
+                                        type="number" name="exam_average_mark" autocomplete="off" value="{{isset($editData)? $editData->exam_pass_mark : old('exam_average_mark')}}">
+                                        <label>Exam Pass Mark <span>*</span></label>
+                                        <span class="focus-border"></span>
+                                        @if ($errors->has('exam_average_mark'))
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $errors->first('exam_average_mark') }}</strong>
+                                        </span>
+                                        @endif
+                                    </div>
+                                </div>
                         </div>
 
                         </div>
@@ -284,6 +297,7 @@
 
                                 </div>
                             </div>
+                            
                             
                         </div>
                         <div class="row md-30 mt-40">

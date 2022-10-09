@@ -374,7 +374,8 @@ class SmExamRoutineController extends Controller
         // $InputSectionId = $request->section;
 
         try {
-            $assign_subjects = SmAssignSubject::where('class_id', $request->class)->where('section_id', $request->section)->where('academic_id', getAcademicId())->where('school_id',Auth::user()->school_id)->get();
+            $assign_subjects = SmAssignSubject::where('class_id', $request->class)->where('section_id', $request->section)->where('academic_id', getAcademicId())->where('school_id', Auth::user()->school_id)->get();
+
 
             if ($assign_subjects->count() == 0) {
                 Toastr::error('No Subject Assigned. Please assign subjects in this class.', 'Failed');
@@ -401,6 +402,7 @@ class SmExamRoutineController extends Controller
             }
 
             $exam_dates = array_unique($exam_dates);
+
 
             return view('backEnd.examination.exam_schedule_new', compact('classes', 'exams', 'assign_subjects', 'class_id', 'section_id', 'exam_id', 'exam_types', 'exam_periods', 'exam_dates'));
         } catch (\Exception $e) {

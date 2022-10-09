@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade as PDF;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use DB;
 
 class SmStudentIdCardController extends Controller
 {
@@ -358,4 +360,107 @@ class SmStudentIdCardController extends Controller
             return redirect()->back();
         }
     }
+
+    public function generateLoginCard()
+    {
+
+        try {
+            $classes = SmClass::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id', Auth::user()->school_id)->get();
+
+            return view('backEnd.admin.generate_login_card', compact('classes'));
+
+        } catch (\Exception $e) {
+            Toastr::error('Operation Failed', 'Failed');
+            return redirect()->back();
+        }
+    }
+
+    public function generateLoginCardPrint(Request $request)
+    {
+
+        $request->validate([
+            'class' => 'required'
+        ]);
+
+        if($request->section != ""){
+            $students = SmStudent::with('className','parents','section','gender', 'user')->where('active_status', 1)->where('class_id', $request->class)
+                    ->where('section_id', $request->section)->where('academic_id', getAcademicId())->where('school_id', Auth::user()->school_id)->get();
+        }else{
+            $students = SmStudent::with('className','parents','section','gender', 'user')->where('active_status', 1)->where('class_id', $request->class)
+                    ->where('academic_id', getAcademicId())->where('school_id', Auth::user()->school_id)->get();
+        }
+
+        
+
+
+        return view('backEnd.admin.student_login_card_print', ['students' => $students]);
+
+        $pdf = PDF::loadView('backEnd.admin.student_login_card_print', ['students' => $students]);
+        return $pdf->stream('student_login_card.pdf');
+    }
+
+// new password
+
+    public function generateNewPassword()
+    {
+
+        try {
+            $classes = SmClass::where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id', Auth::user()->school_id)->get();
+
+            return view('backEnd.admin.generate_new_password', compact('classes'));
+
+        } catch (\Exception $e) {
+            Toastr::error('Operation Failed', 'Failed');
+            return redirect()->back();
+        }
+    }
+    
+    public function generateNewPasswordPost(Request $request)
+    {
+
+        $request->validate([
+            'class' => 'required'
+        ]);
+
+
+        DB::beginTransaction();
+        try {
+
+            if($request->section != ""){
+                $students = SmStudent::with('user')->where('active_status', 1)->where('class_id', $request->class)
+                        ->where('section_id', $request->section)->where('academic_id', getAcademicId())->where('school_id', Auth::user()->school_id)->get();
+            }else{
+               $students = SmStudent::with('user')->where('active_status', 1)->where('class_id', $request->class)
+                        ->where('academic_id', getAcademicId())->where('school_id', Auth::user()->school_id)->get(); 
+            }
+
+            
+
+                        // dd($students);
+
+            foreach($students as $student){
+                $pin_password = uniqid();
+
+                $user               = $student->user;
+                $user->pin_password = $pin_password;
+                $user->password     = Hash::make($pin_password);
+                $user->save();
+            }
+
+            DB::commit();
+
+            Toastr::success('Generated successful', 'Success');
+            return redirect()->back();
+
+
+        } catch (\Exception $e) {
+
+            DB::rollback();
+            Toastr::error('Operation Failed', 'Failed');
+            return redirect()->back();
+        }
+    }
+
+
+
 }

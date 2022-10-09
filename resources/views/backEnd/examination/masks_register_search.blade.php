@@ -168,17 +168,17 @@
                                 </div>                                
                             </td>
                             @endforeach
-                            <?php 
+                            {{-- <?php 
 
                                 $is_absent_check = App\SmMarksRegister::is_absent_check($part->exam_term_id, $part->class_id, $part->section_id, $part->subject_id, $student->id);
-                            ?>
+                            ?> --}}
                             <td>
                                 <div class="input-effect">
-                                    @if(@$is_absent_check->attendance_type == 'P')
-                                    <button class="primary-btn small fix-gr-bg" type="button">@lang('lang.present')</button>
-                                    @else
-                                    <button class="primary-btn small bg-danger text-white border-0" type="button">@lang('lang.absent')</button>
-                                    @endif
+                                   @if($is_absent==1)
+                                    Yes
+                                    @else 
+                                    No
+                                    @endif 
                                 </div>
                                     
                             </td>

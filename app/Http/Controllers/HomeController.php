@@ -63,6 +63,7 @@ class HomeController extends Controller
 
     public function dashboard()
     {
+
         try {
             $role_id = Session::get('role_id');
             $user = Auth::user();
@@ -92,6 +93,7 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
+
         try {
             if (date('d') <= 15) {
                 $client = new \GuzzleHttp\Client();

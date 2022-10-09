@@ -1,489 +1,520 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Mark Sheet </title>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head> 
+<style>
+    th{
+        border: 2px solid black;
+        text-align: center;
+        padding: 5px !important;
+        font-size: 10px;
+        font-weight:300;
+    }
+    td{
+        text-align: center;
+        padding: 5px !important;
+        font-size: 10px;
+    }
+    td.subject-name{
+        text-align: left;
+        padding-left: 10px !important;
+    }
+  
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{{ asset('/')}}/public/backEnd/css/report/bootstrap.min.css">
-     <!-- <link rel="stylesheet" href="style.css"> -->
-    <title>Mark Sheet Report</title>
-  <style>
-    *{
-      margin: 0;
-      padding: 0;
+    .studentInfoTable{
+        width: 100%;
+        padding: 0px !important;
+        font-weight:400;
+    }
+
+    .studentInfoTable td{
+        padding: 0px !important;
+        text-align: left;
+    }
+    h4{
+        text-align: center !important;
+    }
+    h5{
+        font-family: none !important;
+    }
+    .schoolname{
+        font-family: none !important;
+    }
+    .table-bordered{
+        border:1px solid #000 !important;
+    }
+    .table-bordered td{
+        border:1px solid #000 !important;
+    }
+    .table-bordered th{
+        border:1px solid #000 !important;
+        font-weight:bold;
     }
     body{
-      font-size: 12px;
-      font-family: 'Poppins', sans-serif;
+        border:1px solid #000 !important;
+        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
     }
-    .student_marks_table{
-      width: 65%;
-      margin: 30px auto 0 auto;
+    .pass_fail{
+        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
     }
-    .text_center{
-      text-align: center;
-    }
-    p{
-      margin: 0;
-      font-size: 12px;
-      text-transform: capitalize;
-    }
-    ul{
-      margin: 0;
-      padding: 0;
-    }
-    li{
-      list-style: none;
-    }
-    td {
-    border: 1px solid #726E6D;
-    padding: .8rem;
-    text-align: center;
-  }
-  th{
-    border: 1px solid #726E6D;
-    text-transform: capitalize;
-    text-align: center;
-    padding: 1rem;
-    white-space: nowrap;
-  }
-  thead{
-    font-weight:bold;
-    text-align:center;
-    color: #222;
-    font-size: 10px
-  }
-  .custom_table{
-    width: 100%;
-  }
-  table.custom_table thead th {
-    padding-right: 0;
-    padding-left: 0;
-  }
-  table.custom_table thead tr > th {
-    border: 0;
-    padding: 0;
-}
-/* tr:last-child td {
-    border: 0 !important;
-}
-tr:nth-last-child(2) td {
-    border: 0 !important;
-}
-tr:nth-last-child(3) td {
-    border: 0 !important;
-} */
+</style>
+ <body>
 
-table.custom_table thead tr th .fees_title{
-  font-size: 12px;
-  font-weight: 600;
-  border-top: 1px solid #726E6D;
-  padding-top: 10px;
-  margin-top: 10px;
-}
-.border-top{
-  border-top: 0 !important;
-}
-  .custom_table th ul li {
-  }
-  .custom_table th ul li p {
-    margin-bottom: 10px;
-    font-weight: 500;
-    font-size: 14px;
-}
-/* tbody td p{
-  text-align: right;
-} */
-tbody td{
-  padding: 0.8rem;
-}
-table{
-  border-spacing: 10px;
-  width: 65%;
-  margin: auto;
-}
-.fees_pay{
-  text-align: center;
-}
-.border-0{
-  border: 0 !important;
-}
-.copy_collect{
-  text-align: center;
-  font-weight: 500;
-  color: #000;
-}
-
-.copyies_text{
-  display: flex;
-  justify-content: space-between;
-  margin: 30px 0;
-}
-.copyies_text li{
-  text-transform: capitalize;
-  color: #000;
-  font-weight: 500;
-  border-top: 1px dashed #ddd;
-}
-.text_left{
-    text-align: left;
-}
-.italic_text{
-}
-.student_info{
-    
-}
-.student_info li{
-    display: flex;
-}
-.info_details{
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 30px;
-    margin-bottom: 30px;
-}
-.info_details li > p{
-    flex-basis: 20%;
-}
-.info_details li{
-    display: flex;
-    flex-basis: 50%;
-}
-.school_name{
-    text-align: center;
-}
-.numbered_table_row{
-    display: flex;
-    justify-content: space-between;
-    margin-top: 40px;
-    align-items: center;
-}
-.numbered_table_row thead{
-    border: 1px solid #222
-}
-.numbered_table_row h3{
-    font-size: 24px;
-    text-transform: uppercase;
-    margin-top: 15px;
-    font-weight: 500;
-    display: inline-block;
-    border-bottom: 2px solid #222;
-}
-.numbered_table_row td{
-   border: 1px solid #726E6D;
-   padding: .4rem;
-   font-weight: 400;
-   color: #222;
-}
-
-table#grade_table th {
-    border: 1px solid #726E6D !important;
-    padding: .6rem;
-    font-weight: 600;
-    color: #222;
-}
-td.border-top.border_left_hide {
-    border-left: 0;
-    text-align: left;
-    font-weight: 600;
-}
-.devide_td{
-    padding: 0;
-}
-.devide_td p{
-    border-bottom: 1px solid #222;
-}
-.ssc_text{
-    font-size: 20px;
-    font-weight: 500;
-    color: #222;
-    margin-bottom: 20px;
-}
-  </style>
-
-  </head>
-  @php 
-$generalSetting= App\SmGeneralSettings::find(1);
-if(!empty($generalSetting)){
-    $school_name =$generalSetting->school_name;
-    $site_title =$generalSetting->site_title;
-    $school_code =$generalSetting->school_code;
-    $address =$generalSetting->address;
-    $phone =$generalSetting->phone;
-    $email =$generalSetting->email;  
-}
+ 
+@php 
+    $generalSetting= App\SmGeneralSettings::find(1);
+    if(!empty($generalSetting)){
+        $school_name =$generalSetting->school_name;
+        $site_title =$generalSetting->site_title;
+        $school_code =$generalSetting->school_code;
+        $address =$generalSetting->address;
+        $phone =$generalSetting->phone; 
+    }
 
 @endphp
-<script>
-        var is_chrome = function () { return Boolean(window.chrome); }
-        if(is_chrome) 
-        {
-           window.print();
-        //    setTimeout(function(){window.close();}, 10000); 
-           //give them 10 seconds to print, then close
-        }
-        else
-        {
-           window.print();
-        //    window.close();
-        }
-        </script>
-    <body onLoad="loadHandler();">
-    
-    <div class="student_marks_table">
-            <table class="custom_table">
-                    <thead>
-                        <tr>
-                                <div class="school_name">
-                                        <h4>{{isset(generalSetting()->school_name)?generalSetting()->school_name:'Infix School Management ERP'}} </h4>
-                                        <p>{{isset(generalSetting()->address)?generalSetting()->address:'Infix School Address'}}
-                                          
-                                </div>
-                        </tr>
-                        <tr class="numbered_table_row" >
-                            <td class="border-0">
-            
-                            </td>
-                            <td class="border-0" >
-                                <div class="school_mark">
-                                    <p class="ssc_text" >{{$exam_details->title}} -  {{$class_name->class_name}}({{$section->section_name}})</p>
-                                    <div>
-                                            <img src=" {{asset('/')}}{{generalSetting()->logo }}" alt="">
+
+<div class="container-fluid"> 
+    <table  style="width: 100%; border: 0px;"> 
+            <tr > 
+                <td style="width: 15%">
+                    <img class="logo-img" src="{{ url('/')}}/{{$generalSetting->logo }}" alt="" width="65" style="margin-top: 5px">
+                </td>
+                <td style="text-align: center; width: 70%"> 
+                    <span class="text-white schoolname" style="font-size: 18px;"> {{isset($school_name)?$school_name:'Infix School Management ERP'}} </span> 
+                    <p class="text-white mb-0"> {{isset($address)?$address:'Infix School Address'}} </p>
+                </td> 
+                <td style="width: 15%">
+                    @if(file_exists($student_detail->student_photo))
+                    <img class="logo-img" src="{{ url('/')}}/{{$student_detail->student_photo }}" alt="" width="80" height="80"> 
+                    @endif
+                </td>
+            </tr> 
+    </table>
+    <div class="container-fluid p-0"> 
+        <div class="row">
+            <div class="col-lg-12"> 
+                <div class="row justify-content-center">
+                    <div class="col-lg-12">
+                        <div class="single-report-admit">
+                            <div class="card"> 
+                               
+                                <div class="card-body">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="offset-1 col-md-10">
+
+                                                <table class="table">
+                                                    <tr>
+                                                        <td>
+                                                            <table class="studentInfoTable">
+                                                                <tr>
+                                                                    <td class="font-weight-bold">
+                                                                        Name of Student :
+                                                                    </td>
+                                                                    <td>
+                                                                        {{$student_detail->full_name}}
+                                                                    </td>
+                                                                </tr>
+                                                                 <tr>
+                                                                        <td class="font-weight-bold">
+                                                                            Date of birth :
+                                                                        </td>
+                                                                        <td>
+                                                                            {{$student_detail->date_of_birth != "" && $student_detail->date_of_birth != "1970-01-01"? App\SmGeneralSettings::DateConvater($student_detail->date_of_birth):''}}
+                                                                        </td>
+                                                                    </tr>
+                                                                <tr>
+                                                                    <td class="font-weight-bold">
+                                                                        Roll Number :
+                                                                    </td>
+                                                                    <td>
+                                                                        {{$student_detail->roll_no}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="font-weight-bold">
+                                                                        Admission Number :
+                                                                    </td>
+                                                                    <td>
+                                                                        {{$student_detail->admission_no}}
+                                                                    </td>
+                                                                </tr>
+
+
+                                                            </table>
+                                                        </td>
+                                                        <td>
+                                                            <table class="studentInfoTable">
+
+                                                                <tr>
+                                                                    <td class="font-weight-bold">
+                                                                        Academic Session :
+                                                                    </td>
+                                                                    <td>
+                                                                        {{@$student_detail->session->session}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="font-weight-bold">
+                                                                        Exam Title :
+                                                                    </td>
+                                                                    <td>
+                                                                        {{$exam_details->title}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="font-weight-bold">
+                                                                        Academic Class :
+                                                                    </td>
+                                                                    <td>
+                                                                        {{$class_name->class_name}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="font-weight-bold">
+                                                                        Class Section :
+                                                                    </td>
+                                                                    <td>
+                                                                        {{$section->section_name}}
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                        <td>
+                                                            <table class="studentInfoTable">
+                                                                <tr>
+                                                                        <td class="font-weight-bold">
+                                                                           Total Marks :
+                                                                        </td>
+                                                                        <td>
+
+                                                                            {{$total_marks_by_student}}
+
+                                                                        </td>
+                                                                    </tr>
+
+                                                                    <tr>
+                                                                        <td class="font-weight-bold">
+                                                                            Class Average :
+                                                                        </td>
+                                                                        <td>
+                                                                           @if($class_name->class_name == "SS 3" || $class_name->class_name == "SS 2")
+                                                                            {{number_format($total_marks_by_student/9, 2)}}
+
+                                                                            @elseif($class_name->class_name == "SS 1")
+                                                                            {{number_format($total_marks_by_student/13, 2)}}
+
+                                                                            @else
+
+                                                                           {{number_format($total_marks_by_student/count($subjects), 2)}}
+
+                                                                           @endif
+
+                                                                        </td>
+                                                                    </tr> 
+                                                                    
+                                                                    
+                                                                    <tr>
+                                                                        <td class="font-weight-bold">
+                                                                           Student Rating :
+                                                                        </td>
+                                                                        <td>
+
+
+
+                                                                             @php
+                                                                             if($class_name->class_name == "SS 3" || $class_name->class_name == "SS 2"){
+
+                                                                                $per_subject = $total_marks_by_student/9;
+
+                                                                             }elseif($class_name->class_name == "SS 1"){
+
+                                                                                $per_subject = $total_marks_by_student/13;
+
+                                                                             }else{
+
+                                                                                $per_subject = $total_marks_by_student/count($subjects);
+
+                                                                             }
+
+                                                                                $mark_grade = App\SmMarksGrade::where([['percent_from', '<=', round($per_subject)], ['percent_upto', '>=', round($per_subject)]])->first();
+
+                                                                              
+
+                                                                               echo $mark_grade->description;
+
+
+                                                                            @endphp
+
+
+
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="font-weight-bold">
+                                                                           Class Position :
+                                                                        </td>
+                                                                        <td>
+
+                                                                            @php
+                                                                            arsort($student_final_marks);
+
+                                                                            $student_average = $total_marks_by_student/count($subjects);
+
+                                                                            $final_position_array = [];
+                                                                            foreach($student_final_marks as $student_final_mark){
+                                                                                $final_position_array[] = $student_final_mark/count($subjects);
+                                                                            }
+
+
+                                                                            echo array_search($student_average,$final_position_array) + 1;
+
+                                                                            @endphp
+
+
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                        </td>
+                                                    </tr>
+                                                    
+                                                </table>
+                                        </div>
                                     </div>
-                                    <h3>academic transcript</h3>
-                                </div>
-                            </td>
-                            <td class="border-0">
-                                    @php $marks_grade=DB::table('sm_marks_grades')->where('academic_id', getAcademicId())->get(); @endphp
-                                    @if(@$marks_grade)
-                                <table class="table" id="grade_table">
-                                    <thead>
+                                    <h5 style="text-align: center; font-weight:bold">Marks Sheet of {{$exam_details->title}}</h5>
+
+                                    <table class="w-100 mt-10 mb-10 table   table-bordered marksheet">
+
+
                                         <tr>
-                                            <th>Staring</th>
-                                            <th>Ending</th>
-                                            <th>GPA</th>
-                                            <th>Grade</th>
-                                            <th>Evalution</th>
+                                            <td width="70%" style="padding: 0px !important">
+
+                                                <table class="w-100 table   table-bordered marksheet">
+
+                                                    <thead>
+                                                        <tr>
+                                                           
+                                                            <th rowspan="2" width="40%">Subjects</th>
+
+
+                                                            <th colspan="3">Marks Obtained</th>
+
+                                                            <th rowspan="2">Letter Grade</th>
+                                                            <th rowspan="2">Grade Point</th>
+                                                            <th rowspan="2">GPA</th>
+                                                        </tr>
+                                                        <tr>
+
+                                                        @foreach($distributed_marks as $distributed_mark)
+                                                                <th>{{$distributed_mark->exam_title}}<br>({{$distributed_mark->exam_mark}}%) </th>
+                                                            @endforeach
+                                                            <th>Total<br>(100%)</th>
+                                                        </tr>
+
+                                                    </thead>
+                                                    <tbody>
+
+                                                    @php $sum_gpa= 0;  $resultCount=1; $subject_count=1; $tota_grade_point=0; $this_student_failed=0; @endphp
+                                                    @foreach($subjects as $data)
+                                                        
+                                                        <tr>
+                                                            <td class="subject-name" width="40%">{{$data->subject->subject_name}} </td>
+                                                            @php
+
+                                                            $subject_count++;
+
+                                                                $distribute_marks = \App\SmMarkStore::where('exam_term_id', $input['exam_id'])->where('class_id', $input['class_id'])->where('section_id', $input['section_id'])->where('subject_id', $data->subject_id)->where('student_id', $input['student_id'])->get();
+
+                                                                @endphp
+                                                                
+                                                                @foreach($distribute_marks as $distribute_mark)
+                                                                    <td>{{$distribute_mark->total_marks}}</td>
+                                                                @endforeach
+
+                                                            <td>
+                                                                     {{$tola_mark_by_subject=App\SmAssignSubject::getSumMark($student_detail->id, $data->subject_id, $class_id, $section_id, $exam_type_id)}}
+                                                            </td>
+                                                            <td>
+
+                                                                @php
+                                                                    $mark_grade = App\SmMarksGrade::where([['percent_from', '<=', $tola_mark_by_subject], ['percent_upto', '>=', $tola_mark_by_subject]])->first();
+
+                                                                @endphp
+                                                                {{$mark_grade->grade_name }}
+                                                            </td>
+                                                            <td>
+
+                                                                @php
+                                                                    $mark_grade = App\SmMarksGrade::where([['percent_from', '<=', $tola_mark_by_subject], ['percent_upto', '>=', $tola_mark_by_subject]])->first();
+                                                                    $tota_grade_point = $tota_grade_point + $mark_grade->gpa ;
+                                                                    if($mark_grade->gpa<1){
+                                                                        $this_student_failed =1;
+                                                                    }
+                                                                @endphp
+
+                                                                {{$mark_grade->gpa }}
+                                                            </td>
+                                                            @if($subject_count==2)
+                                                                <td rowspan="{{count($subjects)}}" style="vertical-align: middle">
+                                                                    @php
+
+                                                                        if($class_name->class_name == "SS 3" || $class_name->class_name == "SS 2"){
+
+                                                                            $get_avarage = $total_marks_by_student/9;
+
+                                                                         }elseif($class_name->class_name == "SS 1"){
+
+                                                                            $get_avarage = $total_marks_by_student/13;
+
+                                                                         }else{
+
+                                                                            $get_avarage = $total_marks_by_student/count($subjects);
+
+                                                                         }
+
+                                                                        $final_gpa = App\SmMarksGrade::where([['percent_from', '<=', round($get_avarage)], ['percent_upto', '>=', round($get_avarage)]])->first();
+
+
+                                                                        echo @$final_gpa->gpa;
+
+                                                                        @endphp
+                                                                </td>
+                                                            @endif
+
+                                                        </tr>
+
+                                                        @endforeach
+
+                                                    </tbody>
+                                                </table>
+                                                
+                                            </td>
+                                            <td width="30%" style="padding: 0px !important; margin: 0px !important; border: none !important; border-right: none !important;">
+
+                                                <table class="w-100 table   table-bordered marksheet principal-signature" style="padding: 0px !important; margin: 0px !important; border-bottom: none !important; border-left: none !important;">
+                                                    <tr>
+                                                        <th colspan="4">GRADING SYSTEM</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Letter Grade</th>
+                                                        <th>GPA</th>
+                                                        <th>Score Range</th>
+                                                        <th>Remarks</th>
+                                                    </tr>
+                                                    @foreach($marks_grades as $marks_grade)
+                                                    <tr>
+                                                        <td>{{$marks_grade->grade_name}}</td>
+                                                        <td>{{$marks_grade->gpa}}</td>
+                                                        <td>{{$marks_grade->percent_from .'-'. $marks_grade->percent_upto}}</td>
+                                                        <td>{{$marks_grade->description}}</td>
+                                                    </tr>
+                                                    @endforeach
+                                                    
+                                                    <tr>
+                                                        <td colspan="4">DECISION</td>
+                                                    </tr> 
+
+                                                    <tr>
+                                                        <td colspan="4" height="40" style="margin: 0px !important; border-bottom: none !important; border-right: none !important; font-size: 30px; ">
+                                                            @php
+
+                                                            if($class_name->class_name == "SS 3" || $class_name->class_name == "SS 2"){
+                                                                $average_mark = $total_marks_by_student/9;
+                                                             }elseif($class_name->class_name == "SS 1"){
+                                                                $average_mark = $total_marks_by_student/13;
+                                                             }else{
+                                                                $average_mark = $total_marks_by_student/count($subjects);
+                                                             }
+
+                                                            @endphp
+
+                                                            @if($general_setting->exam_pass_mark <= $average_mark)
+
+                                                            <span class="pass_fail"><strong>PASS</strong></span>
+                                                            @else
+                                                            <span class="pass_fail"><strong>FAIL</strong></span>
+                                                            @endif
+
+                                                        </td>
+                                                    </tr>
+                                                </table>
+
+
+
+                                                
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody> 
-                                   @foreach($marks_grade as $grade_d)
-                                     <tr>
-                                        <td>{{$grade_d->percent_from}}</td>
-                                        <td>{{$grade_d->percent_upto}}</td>
-                                        <td>{{$grade_d->gpa}}</td>
-                                        <td>{{$grade_d->grade_name}}</td>
-                                        <td class="text-left">{{$grade_d->description}}</td>
-                                    </tr>
-                                    @endforeach
-                                    </tbody>
-                                </table>
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <!-- first header  -->
-                            <th colspan="1" class="text_left">
-                                <ul class="student_info" >
-                                    <li><p>Name of Student &nbsp;  : &nbsp; </p> &nbsp; <p class="italic_text">   {{$student_detail->full_name}} </p></li>
-                                    <li><p>Father's Name &nbsp;  : &nbsp; </p> &nbsp; <p class="italic_text">  {{$student_detail->parents->fathers_name}} </p></li>
-                                    <li><p>Mother's Name &nbsp;  : &nbsp; </p> &nbsp; <p class="italic_text">  {{$student_detail->parents->mothers_name}} </p></li>
-                                    <li><p>Name of institution &nbsp;  : &nbsp; </p> &nbsp; <p class="italic_text">  {{isset(generalSetting()->school_name)?generalSetting()->school_name:'Infix School Management ERP'}} </p></li>
-                                </ul>
-                                <ul class="info_details">
-                                    {{-- <li><p>Name of Centre &nbsp;  &nbsp; </p> &nbsp; <p class="italic_text">  (420) brammanbaria  </p></li> --}}
-                                    {{-- <li><p>Type  &nbsp;  &nbsp; </p> &nbsp; <p class="italic_text">  Regular  </p></li> --}}
-                                    <li><p>Roll No.   &nbsp; &nbsp; </p> &nbsp; <p>  <strong>{{$student_detail->roll_no}}</strong>  </p></li>
-                                    <li><p>Admission No.   &nbsp;  &nbsp; </p> &nbsp; <p>  <strong>{{$student_detail->admission_no}}</strong>  </p></li>
-                                    {{-- <li><p>Group  &nbsp;  &nbsp; </p> &nbsp; <p class="italic_text"> business seience</p></li> --}}
-                                    <li><p>Date of birth   &nbsp;  &nbsp; </p> &nbsp; <p> <strong>{{$student_detail->date_of_birth != ""? dateConvert($student_detail->date_of_birth):''}}</strong></p></li>
-                                </ul> 
-                            </th>
-                        </tr>
-                    </thead>
-                </table>
 
 
-                <table class="custom_table">
-                        <thead>
-                       
-                        </thead>
-                    {{dd(true)}}
-                        <tbody>
-                            <tr>
-                              <!-- first header  -->
-                                <th>SI.NO</th>
-                                <th colspan="2">Name of subjects</th>
-                                <th>letter grade</th>
-                                <th >Greade poient</th>
-                                <th>GPA <br> Without Additional</th>
-                                <th>GPA</th>
-                            </tr>
-                            @php
-                            $main_subject_total_gpa=0;
-                             $Optional_subject_count=0;
-                                if($optional_subject!=''){
-                                    $Optional_subject_count=$subjects->count()-1;
-                                }else{
-                                    $Optional_subject_count=$subjects->count();
-                                }
-                            @endphp
-                            @php $sum_gpa= 0;  $resultCount=1; $subject_count=1; $tota_grade_point=0; $this_student_failed=0; $count=1; @endphp
-                            @foreach($subjects as $data)
-                            @php
-                                    if ($data->subject_id==$optional_subject) { 
-                                        continue;
-                                    }
-                            @endphp  
-                            <tr>
-                            <td class="border-top">{{ $count }}</td>
-                                <td colspan="2" class="border-top" style="text-align: left;padding-left: 15px;"><p>{{$data->subject->subject_name}}</p></td>
-                            <td class="border-top">
-                                <p>
-                                    @php
-                                        $subject_result=App\CustomResultSetting::getSubjectGpa($student_detail->class_id,$student_detail->section_id,$exam_type_id,$student_detail->id,$data->subject_id);
-                                        $subject_gpa=App\CustomResultSetting::gpaToGrade($subject_result[$data->subject_id][1]);
-                                        $main_subject_total_gpa=$main_subject_total_gpa+$subject_result[$data->subject_id][1];
-                                        echo $subject_gpa;
-                                    @endphp
-                                </p> 
-                            </td>
-                                <td class="border-top"><p> 
-                                    @php
-                                        $subject_result=App\CustomResultSetting::getSubjectGpa($student_detail->class_id,$student_detail->section_id,$exam_type_id,$student_detail->id,$data->subject_id);
-                                        echo $subject_result[$data->subject_id][1];
-                                    @endphp</p></td>
+                                    </table>
+                                    <table class="w-100 mt-40 mb-20 table   table-bordered marksheet">
+                                        <tr>
+                                            <th width="20%">Teacher's Comment :</th>
+                                            <td width="80%" style="text-align: left"> {{$teacher_comment}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th width="20%">Principal's Comment :</th>
+                                            <td width="80%" style="text-align: left">{{$principal_comment}}</td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <table class="w-100 mt-40 mb-20 table   table-bordered marksheet">
+                                       <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td>PRINCIPAL’S SIGNATURE/STAMP</td>
+                                       </tr>
+                                        <tr>
+                                            <td width="20%">
+                                                @if(file_exists($student_detail->student_photo))
+                                                <img class="logo-img" src="{{ url('/')}}/{{$student_detail->student_photo }}" alt="" width="90" height="90"> 
+                                                @endif
+                                            </td>
+                                            <td width="50%">
+                                                
+                                            </td>
+                                            <td width="30%" >
+                                                <img class="logo-img" src="{{ asset('public/backEnd/output-onlinepngtools (1).png') }}" alt="" width="80" height="80">
+                                                <img class="logo-img" src="{{ asset('public/backEnd/output-onlinepngtools.png') }}" alt="" width="90" height="90" style="padding-top: 10px;">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <!-- <div class="row">
+                                        <div class="col-lg-12">
+                                            <p class="footer-p">Teacher's Comment : {{$teacher_comment}}</p>
+                                            
+                                        </div>
+                                    </div> 
 
-                                @if ($count==1)
-                                <td rowspan="{{ $Optional_subject_count+1 }}" class="border-top">
-                                    <p id="main_subject_total_gpa">  </p> 
-                                </td>
-                                <td rowspan="{{ $Optional_subject_count+3 }}" class="border-top">
-                                    <p id="final_result">
-                                    </p>
-                                </td>
-                                @endif
-                                @php
-                                    $count++
-                                @endphp
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <p class="footer-p">Principal's Comment : {{$principal_comment}}</p>
+                                            
+                                        </div>
+                                    </div>  -->
 
-                            </tr>
-                          @endforeach
-                         {{-- {{ dd($main_subject_total_gpa) }} --}}
-                          <tr>
-                             <!-- first td wrap  -->
-                            <td colspan="6" class="border-top border_left_hide">Additional Subject</td>
-                          </tr>
-                          @foreach($subjects as $data)
-                          @php
-                                  if ($data->subject_id!=$optional_subject) { 
-                                      continue;
-                                  }
-                          @endphp  
-                         
-                          <tr>
-                             <!-- first td wrap  -->
-                          <td class="border-top" style="border-bottom:1px solid black">{{ $count }}</td>
-                            <td colspan="2" class="border-top" style="border-bottom:1px solid black"><p>{{$data->subject->subject_name}}</p></td>
-                            <td class="border-top" style="border-bottom:1px solid black">
-                                <p>
-                                        @php
-                                        $subject_result=App\CustomResultSetting::getSubjectGpa($student_detail->class_id,$student_detail->section_id,$exam_type_id,$student_detail->id,$data->subject_id);
-                                        $subject_gpa=App\CustomResultSetting::gpaToGrade($subject_result[$data->subject_id][1]);
-                                        echo $subject_gpa;
-                                    @endphp
-                                </p>
-                            </td>
-                            <td class="border-top" style="border-bottom:1px solid black">
-                                <p>
-                                     @php
-                                        $subject_result=App\CustomResultSetting::getSubjectGpa($student_detail->class_id,$student_detail->section_id,$exam_type_id,$student_detail->id,$data->subject_id);
-                                        echo $subject_result[$data->subject_id][1];
-                                    @endphp
-                                </p>
-                            </td>
-                        <td class="border-top devide_td " style="border-bottom:1px solid black">
-                          <p>GP above {{ $optional_subject_setup->gpa_above }}</p> 
-                            <span>
-                                @php
-                                    if($subject_result[$data->subject_id][1]>$optional_subject_setup->gpa_above){
-                                        $optional_countable_gpa=$subject_result[$data->subject_id][1]-$optional_subject_setup->gpa_above;
-                                    }else{
-                                        $optional_countable_gpa=0;
-                                    }
-                                    echo  $optional_countable_gpa;
-                                @endphp 
-                            </span>
-                        </td>
-                          </tr>
-                          @endforeach
-                        </tbody>
-                      </table>
+               
 
 
-                      <script>
-                            function myFunction(value, subject) {
-                                if(value !=""){
-                                    var res =  Number( value/subject).toFixed(2) ; 
-                                }else{
-                                    var res = 0;
-                                } 
-                                  document.getElementById("main_subject_total_gpa").innerHTML = res; 
-                              }
-                    
-                            function myFunction2(value, subject) {
-                                if(value !=""){
-                                    var res =  Number( value/subject).toFixed(2) ; 
-                                }else{
-                                    var res = 0;
-                                } 
-                                  document.getElementById("final_result").innerHTML = res ;
-                              }
-
-                              myFunction({{ $main_subject_total_gpa }}, {{ $Optional_subject_count }});
-                              myFunction2( {{ $main_subject_total_gpa +$optional_countable_gpa  }}, {{ $Optional_subject_count }});
-                            
-                        </script>
-
-
-
-                      <table style="width:100%" class="border-0">
-                            <tbody><tr> 
-                              <td class="border-0"><p class="result-date" style="text-align:left; float:left; display:inline-block; margin-top:50px; padding-left: 0;">
-                                @php
-                                $data = App\SmMarkStore::select('created_at')->where([
-                                   ['student_id',$student_detail->id],
-                                   ['class_id',$class_id],
-                                   ['section_id',$section_id],
-                                   ['exam_term_id',$exam_type_id],
-                               ])->first();
-            
-                               @endphp
-                               @lang('lang.date_of_publication_of_result') : <b> {{date_format(date_create($data->created_at),"F j, Y, g:i a")}}</b></b>
-            </p></td>
-                                <td class="border-0"> 
-                                    <p style="text-align:right; float:right; border-top:1px solid #ddd; display:inline-block; margin-top:50px;">( Exam Controller )</p> 
-                                </td>
-                            </tr>
-                    
-                        </tbody></table>
-    </div>
-
-
-
-
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-
-    <script src="{{ asset('/') }}/public/backEnd/js/fees_invoice/jquery-3.2.1.slim.min.js"></script>
-    <script src="{{ asset('/') }}/public/backEnd/js/fees_invoice/popper.min.js"></script>
-    <script src="{{ asset('/') }}/public/backEnd/js/fees_invoice/bootstrap.min.js"></script>
-
-
-    {{-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> --}}
-  </body>
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div> 
+ 
+</div>
+ 
+           
+</section>
+</body>
 </html>

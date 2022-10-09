@@ -416,7 +416,9 @@ Route::group(['middleware' => ['XSS','subscriptionAccessUrl']], function () {
         // merit list Report
         Route::get('merit-list-report', ['as' => 'merit_list_report', 'uses' => 'SmExaminationController@meritListReport'])->middleware('userRolePermission:388');
         Route::post('merit-list-report', ['as' => 'merit_list_report', 'uses' => 'SmExaminationController@meritListReportSearch']);
-        Route::get('merit-list/print/{exam_id}/{class_id}/{section_id}',  'SmExaminationController@meritListPrint')->name('merit-list/print');
+        // Route::get('merit-list/print/{exam_id}/{class_id}/{section_id}',  'SmExaminationController@meritListPrint')->name('merit-list/print');
+        
+        Route::post('merit-list/print',  'SmExaminationController@meritListPrint');
 
 
         //tabulation sheet report
@@ -466,7 +468,8 @@ Route::group(['middleware' => ['XSS','subscriptionAccessUrl']], function () {
         // mark sheet Report
         Route::get('mark-sheet-report', ['as' => 'mark_sheet_report', 'uses' => 'SmExaminationController@markSheetReport']);
         Route::post('mark-sheet-report', ['as' => 'mark_sheet_report', 'uses' => 'SmExaminationController@markSheetReportSearch']);
-        Route::get('mark-sheet-report/print/{exam_id}/{class_id}/{section_id}/{student_id}', ['as' => 'mark_sheet_report_print', 'uses' => 'SmExaminationController@markSheetReportStudentPrint']);
+        // Route::get('mark-sheet-report/print/{exam_id}/{class_id}/{section_id}/{student_id}', ['as' => 'mark_sheet_report_print', 'uses' => 'SmExaminationController@markSheetReportStudentPrint']);
+        Route::post('mark-sheet-report/print', ['as' => 'mark_sheet_report_print', 'uses' => 'SmExaminationController@markSheetReportStudentPrint']);
 
 
         //mark sheet report student
@@ -1006,6 +1009,14 @@ Route::group(['middleware' => ['XSS','subscriptionAccessUrl']], function () {
         Route::post('generate-id-card-search', ['as' => 'generate_id_card_search', 'uses' => 'SmStudentIdCardController@generateIdCardSearch']);
         Route::get('generate-id-card-search', ['as' => 'generate_id_card_search', 'uses' => 'SmStudentIdCardController@generateIdCard']);
         Route::get('generate-id-card-print/{s_id}/{c_id}', 'SmStudentIdCardController@generateIdCardPrint');
+        
+                // student login card
+        Route::get('generate-login-card', ['as' => 'generate_login_card', 'uses' => 'SmStudentIdCardController@generateLoginCard']);
+        Route::post('generate-login-card-print', ['as' => 'generate_login_card_print', 'uses' => 'SmStudentIdCardController@generateLoginCardPrint']);
+
+
+        Route::get('generate-new-password', ['as' => 'generate_new_password', 'uses' => 'SmStudentIdCardController@generateNewPassword']);
+        Route::post('generate-new-password', ['as' => 'generate_new_password', 'uses' => 'SmStudentIdCardController@generateNewPasswordPost']);
 
 
         // Student Module /Student Admission
@@ -1705,3 +1716,5 @@ Route::group(['middleware' => ['XSS','subscriptionAccessUrl']], function () {
     });
     Route::post('update-payment-gateway', 'SmSystemSettingController@updatePaymentGateway')->name('update-payment-gateway')->middleware('userRolePermission:414');
 });
+
+Route::get('ajaxStudentPromoteSection', 'SmStudentAdmissionController@ajaxStudentPromoteSection');

@@ -1337,6 +1337,7 @@ class SmSystemSettingController extends Controller
             'time_zone'       => "required",
             'promotionSetting' => "required",
             'file_size' => "required",
+            'exam_average_mark' => "required",
 
         ]);
 
@@ -1369,6 +1370,10 @@ class SmSystemSettingController extends Controller
             $generalSettData->time_zone_id = $request->time_zone;
             $generalSettData->file_size = $request->file_size;
             $generalSettData->copyright_text = $request->copyright_text;
+
+            $generalSettData->exam_pass_mark = $request->exam_average_mark;
+
+            
             $results = $generalSettData->save();
 
             if($results){

@@ -21,7 +21,7 @@
                         <h3 class="mb-30">@lang('lang.select_criteria') </h3>
                     </div>
                 </div>
-            @if(userPermission(223))
+           {{-- @if(userPermission(223)) --}}
 
                 <div class="col-lg-4 text-md-right text-left col-md-6 mb-30-lg col-sm-6 text_sm_right">
                     <a href="{{route('marks_register_create')}}" class="primary-btn small fix-gr-bg">
@@ -30,7 +30,7 @@
                     </a>
 
                 </div>
-            @endif
+            {{--  @endif --}}
             </div>
         </div>
         <div class="row">

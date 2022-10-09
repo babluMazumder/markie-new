@@ -329,7 +329,6 @@ class SmStudentAdmissionController extends Controller
             $request->validate(
                 [
                     'admission_number' => 'required',
-                    'roll_number' => 'required',
                     'class' => 'required',
                     'section' => 'required',
                     'session' => 'required',
@@ -352,7 +351,6 @@ class SmStudentAdmissionController extends Controller
             $request->validate(
                 [
                     'admission_number' => 'required',
-                    'roll_number' => 'required',
                     'class' => 'required',
                     'section' => 'required',
                     'gender' => 'required',
@@ -512,8 +510,26 @@ class SmStudentAdmissionController extends Controller
             $user_stu = new User();
             $user_stu->role_id = 2;
             $user_stu->full_name = $request->first_name . ' ' . $request->last_name;
-            $user_stu->username = $request->admission_number;
-            $user_stu->email = $request->email_address;
+
+            // if ($request->email_address != null) {
+            //     $user_stu->username = $request->email_address;
+            // } else {
+                $user_stu->username = $short_form . '-' . $request->admission_number;
+            // }
+
+
+            // if (empty($request->email_address)) {
+            //     $user_stu->email = $short_form . '-' . $request->admission_number;
+            // } else {
+                $user_stu->email = $short_form . '-' . $request->admission_number;
+            // }
+
+
+
+            // $user_stu->username = $request->admission_number;
+
+            // $user_stu->email = $request->email_address;
+
             $user_stu->password = Hash::make(123456);
             $user_stu->school_id = Auth::user()->school_id;
            
@@ -531,10 +547,20 @@ class SmStudentAdmissionController extends Controller
                     $user_parent->full_name = $request->fathers_name;
 
 
-                    if (!empty($request->guardians_email)) {
+                    // if (!empty($request->guardians_email)) {
+                    //     $data_parent['email'] = $request->guardians_email;
+                    //     $user_parent->username = $request->guardians_email;
+                    // }
+
+                    if (empty($request->guardians_email)) {
+
+                        $user_parent->username  = 'par_' . $request->admission_number;
+                    } else {
                         $data_parent['email'] = $request->guardians_email;
                         $user_parent->username = $request->guardians_email;
                     }
+
+
 
                     $user_parent->email = $request->guardians_email;
                     $user_parent->password = Hash::make(123456);
@@ -1631,6 +1657,7 @@ class SmStudentAdmissionController extends Controller
 
     public function studentUpdate(Request $request)
     {
+        
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
@@ -1657,6 +1684,8 @@ class SmStudentAdmissionController extends Controller
             Toastr::error('Duplicate guardian mobile number found!', 'Failed');
             return redirect()->back()->withInput();
         }
+        
+       
 
 
         if (($request->sibling_id == 0 || $request->sibling_id == 1) && $request->parent_id == "") {
@@ -1664,7 +1693,6 @@ class SmStudentAdmissionController extends Controller
             $request->validate(
                 [
                     'admission_number' => 'required',
-                    'roll_number' => 'required',
                     'class' => 'required',
                     'section' => 'required',
                     'gender' => 'required',
@@ -1681,7 +1709,6 @@ class SmStudentAdmissionController extends Controller
             $request->validate(
                 [
                     'admission_number' => 'required',
-                    'roll_number' => 'required',
                     'class' => 'required',
                     'section' => 'required',
                     'gender' => 'required',
@@ -1696,7 +1723,6 @@ class SmStudentAdmissionController extends Controller
             $request->validate(
                 [
                     'admission_number' => 'required',
-                    'roll_number' => 'required',
                     'class' => 'required',
                     'section' => 'required',
                     'gender' => 'required',
@@ -1711,7 +1737,6 @@ class SmStudentAdmissionController extends Controller
             $request->validate(
                 [
                     'admission_number' => 'required',
-                    'roll_number' => 'required',
                     'class' => 'required',
                     'section' => 'required',
                     'gender' => 'required',
@@ -1730,6 +1755,7 @@ class SmStudentAdmissionController extends Controller
                 ]
             );
         }
+        
 
 
         // always happen start
@@ -1870,7 +1896,6 @@ class SmStudentAdmissionController extends Controller
             }
         }
 
-
         $shcool_details = SmGeneralSettings::find(1);
         $school_name = explode(' ', $shcool_details->school_name);
         $short_form = '';
@@ -1883,27 +1908,20 @@ class SmStudentAdmissionController extends Controller
 
 
         DB::beginTransaction();
-
         try {
+            
             $academic_year = SmAcademicYear::find($request->session);
             //$user_stu->created_at = $academic_year->year . '-01-01 12:00:00';
 
-
-
             $user_stu = User::find($student_detail->user_id);
             $user_stu->role_id = 2;
-
-
-            $user_stu->username = $request->admission_number;
-
-
-            $user_stu->email = $request->email_address;
-
-
-            $user_stu->password = Hash::make(123456);
-
+            $user_stu->username = $short_form.'-'.$request->admission_number;
+            $user_stu->email = $short_form.'-'.$request->admission_number;
+            // $user_stu->password = Hash::make('60b8bdc62828f');
             $user_stu->created_at = $academic_year->year . '-01-01 12:00:00';
-
+            
+            $user_stu->full_name = $request->first_name . ' ' . $request->last_name;
+            
             $user_stu->save();
             $user_stu->toArray();
 
@@ -1914,7 +1932,6 @@ class SmStudentAdmissionController extends Controller
                     $user_parent->role_id = 3;
                     $user_parent->username = $request->guardians_email;
                     $user_parent->email = $request->guardians_email;
-                    $user_parent->password = Hash::make(123456);
                     $user_parent->created_at = $academic_year->year . '-01-01 12:00:00';
                     $user_parent->save();
                     $user_parent->toArray();
@@ -1928,7 +1945,6 @@ class SmStudentAdmissionController extends Controller
                     $user_parent->username = $request->guardians_email;
                     $user_parent->email = $request->guardians_email;
 
-                    $user_parent->password = Hash::make(123456);
                     $user_parent->created_at = $academic_year->year . '-01-01 12:00:00';
                     $user_parent->save();
                     $user_parent->toArray();
@@ -3045,13 +3061,19 @@ class SmStudentAdmissionController extends Controller
                             $user_stu->role_id = 2;
                             $user_stu->full_name = $value->first_name . ' ' . $value->last_name;
 
-                            if (empty($value->email)) {
-                                $user_stu->username = $value->admission_number;
-                            }else{
+                            if ($value->email != null) {
                                 $user_stu->username = $value->email;
+                            } else {
+                                $user_stu->username = $short_form . '-' . $admission_number;
                             }
 
-                            $user_stu->email = $value->email;
+
+                            if (empty($value->email)) {
+                                $user_stu->email = $short_form . '-' . $admission_number;
+                            } else {
+                                $user_stu->email = $value->email;
+                            }
+
 
                             $user_stu->school_id = Auth::user()->school_id;
 
@@ -3074,11 +3096,23 @@ class SmStudentAdmissionController extends Controller
 
                                     $user_parent->username  = 'par_' . $value->admission_number;
                                 } else {
-
                                     $data_parent['email'] = $value->guardian_email;
 
                                     $user_parent->username = $value->guardian_email;
                                 }
+
+
+
+                                // if (empty($value->guardian_email)) {
+                                //     $data_parent['email'] = 'par_' . $value->admission_number;
+
+                                //     $user_parent->username  = 'par_' . $value->admission_number;
+                                // } else {
+
+                                //     $data_parent['email'] = $value->guardian_email;
+
+                                //     $user_parent->username = $value->guardian_email;
+                                // }
 
                                 $user_parent->email = $value->guardian_email;
 
