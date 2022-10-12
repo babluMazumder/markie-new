@@ -32,17 +32,6 @@
       'PDF' => 'Barryvdh\\DomPDF\\Facade',
     ),
   ),
-  'bigbharatjain/laravel-clickatell' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Clickatell\\ClickatellServiceProvider',
-    ),
-    'aliases' => 
-    array (
-      'Clickatell' => 'Clickatell\\ClickatellFacade',
-    ),
-  ),
   'brian2694/laravel-toastr' => 
   array (
     'providers' => 

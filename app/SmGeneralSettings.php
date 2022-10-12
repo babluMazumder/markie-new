@@ -92,11 +92,14 @@ class SmGeneralSettings extends Model
 
     public static function make_merit_list($InputClassId, $InputSectionId, $InputExamId)
     {
+
+       
         try {
             $iid = time();
             $class          = SmClass::find($InputClassId);
             $section        = SmSection::find($InputSectionId);
             $exam           = SmExamType::find($InputExamId);
+
             $is_data = DB::table('sm_mark_stores')->where([['class_id', $InputClassId], ['section_id', $InputSectionId], ['exam_term_id', $InputExamId]])->first();
             if (empty($is_data)) {
                 return $data = 0;
@@ -111,12 +114,13 @@ class SmGeneralSettings extends Model
             $class_name = $class->class_name;
             $exam_name = $exam->title;
             $eligible_subjects       = SmAssignSubject::where('class_id', $InputClassId)->where('section_id', $InputSectionId)->where('academic_id', getAcademicId())->get();
-            $eligible_students       = SmStudent::where('class_id', $InputClassId)->where('section_id', $InputSectionId)->where('academic_id', getAcademicId())->get();
-
+            $eligible_students       = SmStudent::where('class_id', $InputClassId)->where('section_id', $InputSectionId)->where('academic_id', getAcademicId())->limit(28)->get();
+            // dd($eligible_students);
             //all subject list in a specific class/section
             $subject_ids        = [];
             $subject_strings    = '';
             $marks_string       = '';
+
             foreach ($eligible_students as $SingleStudent) {
                 foreach ($eligible_subjects as $subject) {
                     $subject_ids[]      = $subject->subject_id;
@@ -148,7 +152,7 @@ class SmGeneralSettings extends Model
                     }
                 }
                 //end subject list for specific section/class
-
+          
                 $results                =  SmResultStore::where([
                     ['exam_type_id',   $InputExamId],
                     ['class_id',       $InputClassId],
@@ -176,7 +180,7 @@ class SmGeneralSettings extends Model
                     ['section_id',     $InputSectionId],
                     ['student_id',     $SingleStudent->id]
                 ])->sum('total_marks');
-
+              
                 $sum_of_mark = ($total_marks == 0) ? 0 : $total_marks;
                 $average_mark = ($total_marks == 0) ? 0 : floor($total_marks / $results->count()); //get average number
                 $is_absent = (count($is_absent) > 0) ? 1 : 0;         //get is absent ? 1=Absent, 0=Present
@@ -185,12 +189,14 @@ class SmGeneralSettings extends Model
                 $full_name          =   $SingleStudent->full_name;                 //get name
                 $admission_no       =   $SingleStudent->admission_no;           //get admission no
                 $student_id       =   $SingleStudent->id;           //get admission no
+                
                 $is_existing_data = SmTemporaryMeritlist::where([['admission_no', $admission_no], ['class_id', $InputClassId], ['section_id', $InputSectionId], ['exam_id', $InputExamId]])->first();
                 if (empty($is_existing_data)) {
                     $insert_results                     = new SmTemporaryMeritlist();
                 } else {
                     $insert_results                     = SmTemporaryMeritlist::find($is_existing_data->id);
                 }
+       
                 $insert_results->student_name       = $full_name;
                 $insert_results->admission_no       = $admission_no;
                 $insert_results->subjects_string    = $subject_strings;
@@ -212,7 +218,7 @@ class SmGeneralSettings extends Model
                 $insert_results->exam_id            = $InputExamId;
                 $insert_results->created_at = YearCheck::getYear() . '-' . date('m-d h:i:s');
                 $arrCheck = explode(",", $marks_string);
-
+           
                 $checkVal = min($arrCheck);
                 $Grade = SmMarksGrade::where('gpa', 0)->first();
                 if ($checkVal > $Grade->percent_upto) {
@@ -225,8 +231,10 @@ class SmGeneralSettings extends Model
                 $exart_gp_point = 0;
                 $admission_no = 0;
                 $full_name = "";
+                
             } //end loop eligible_students
-
+           
+        //   dd('ok');
             $first_data = SmTemporaryMeritlist::where('iid', $iid)->first();
             if ($first_data == null) {
                 return $data = 0;

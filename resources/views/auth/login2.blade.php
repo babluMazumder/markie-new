@@ -36,7 +36,7 @@ $ttl_rtl = $setting->ttl_rtl;
   <body >
     
     <!-- code start here -->
-
+ 
     <div class="login_resister_area" style="{{$css }}">
         <div class="container">
             <div class="row">

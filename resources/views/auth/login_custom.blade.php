@@ -69,7 +69,7 @@ activeStyle() = App\SmStyle::where('is_active', 1)->first();
 
 			                        <button type="submit" class="white get-login-access">Super Admin</button>
 			                    </form>
-
+								 
 						</div>
 						<div class="singleLoginButton">
 

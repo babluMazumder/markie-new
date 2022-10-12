@@ -72,7 +72,7 @@
                         $setting = generalSetting();
                     
                         @endphp
-                       
+                      
                        
                         <img src="{{asset($setting->logo)}}" alt="Login Panel">
                         <div class="in_login_page_iner">

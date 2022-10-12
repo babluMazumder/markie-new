@@ -6,6 +6,8 @@ use Auth;
 use Closure;
 use Session;
 use App\User;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
 
 class StudentMiddleware
 {
@@ -18,6 +20,8 @@ class StudentMiddleware
      */
     public function handle($request, Closure $next)
     {
+
+        // dd(Hash::make('12345678'));
         if (User::checkAuth() == false || User::checkAuth() == null) {
             return redirect()->route('system.config');
         }

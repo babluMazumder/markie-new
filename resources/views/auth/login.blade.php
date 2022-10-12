@@ -50,7 +50,7 @@ $ttl_rtl = $setting->ttl_rtl;
         <div class="container">
             <div class="row">
                 <div class="col-xl-8 offset-xl-2">
-                    
+                 
                         
                    
                     <div class="importtant_button d-block justify-content-center">

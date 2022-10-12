@@ -240,7 +240,7 @@
                                                                     </tr>
                                                                     <tr>
                                                                         <td class="font-weight-bold">
-                                                                            Admission Number :
+                                                                            Card Reference :
                                                                         </td>
                                                                         <td>
                                                                             {{$student_detail->admission_no}}
@@ -292,7 +292,7 @@
                                                                 <table class="studentInfoTable">
                                                                      <tr>
                                                                         <td class="font-weight-bold">
-                                                                            Class Average :
+                                                                            Student Average :
                                                                         </td>
                                                                         <td>
                                                                             @if($class_name->class_name == "SS 3" || $class_name->class_name == "SS 2")

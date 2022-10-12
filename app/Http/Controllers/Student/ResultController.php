@@ -38,10 +38,9 @@ class ResultController extends Controller
 {
     public function markSheetStudent(Request $request)
     {
-        $exams = SmExamType::where('active_status', 1)->get();
-        $classes = SmClass::where('active_status', 1)->get();
-
-        
+        $exams = SmExamType::where('academic_id',getAcademicId())->where('school_id',Auth::user()->school_id)->where('active_status', 1)->get();
+        $classes = SmClass::where('academic_id',getAcademicId())->where('school_id',Auth::user()->school_id)->where('active_status', 1)->get();
+     
         return view('backEnd.studentPanel.mark_sheet_report_student', compact('exams', 'classes'));
     }
     

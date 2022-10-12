@@ -6,6 +6,7 @@ use Auth;
 use Closure;
 use Session;
 use App\User;
+ 
 
 class CheckDashboardMiddleware
 {
@@ -19,6 +20,7 @@ class CheckDashboardMiddleware
     public function handle($request, Closure $next)
     {
 
+      
         if (User::checkAuth() == false || User::checkAuth() == null) {
             return redirect()->route('system.config');
         }

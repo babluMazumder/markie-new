@@ -2304,11 +2304,12 @@ class SmStudentAdmissionController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
+ 
         try {
             if ($request->result == 'P') {
+            
                 $students = SmGeneralSettings::make_merit_list($request->current_class, $request->section, $request->exam);
-
-                //  dd($students);
+                 
                 if (@$students == 0) {
                     Toastr::error('No result found', 'Failed');
                     return redirect()->back();
@@ -2326,6 +2327,7 @@ class SmStudentAdmissionController extends Controller
             } else {
                 $students = SmStudent::where('class_id', '=', $request->current_class)->where('session_id', '=', $request->current_session)->where('section_id', $request->section)->where('active_status', 1)->where('academic_id', getAcademicId())->where('school_id', Auth::user()->school_id)->get();
             }
+           
             $current_session = $request->current_session;
             $current_class = $request->current_class;
             $sessions = SmAcademicYear::where('active_status', 1)->where('school_id', Auth::user()->school_id)->get();
@@ -2335,7 +2337,7 @@ class SmStudentAdmissionController extends Controller
             $Upsessions = SmAcademicYear::where('active_status', 1)->whereYear('created_at', '>', date('Y', strtotime($UpYear->year)) . ' 00:00:00')->where('school_id', Auth::user()->school_id)->get();
             $Upcls = SmClass::find($current_class);
             $Upclasses = SmClass::where('active_status', 1)->whereYear('created_at', '>', date('Y', strtotime($UpYear->year)) . ' 00:00:00')->where('school_id', Auth::user()->school_id)->get();
-
+            
             if (@$students['allresult_data'] ? $students['allresult_data']->isEmpty() : empty($students)) {
                 Toastr::error('No result found', 'Failed');
                 return redirect('student-promote');

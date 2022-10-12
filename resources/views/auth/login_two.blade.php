@@ -200,7 +200,7 @@ p{
 
 						</div>
 						@endif
-
+						 
 						@php
 							  $user =  DB::table('users')->select('email')->where('role_id',5)->first();
 						@endphp
